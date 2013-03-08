@@ -11,6 +11,7 @@ quantum numbers involved, such as spin, orbital momentum and principal quantum n
 BeWF::BeWF(int myrank, int numprocs, double _alpha, double _beta):
     VMCSolver(myrank, numprocs)
 {
+    cout << " i am jonathan "<<endl;
     this->charge=4;
     this->nParticles=4;
     this->alpha=_alpha;
