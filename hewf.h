@@ -13,8 +13,8 @@ public:
     double jastrowRatio(const int k);
     double sdratio();
 
-    double localEnergyClosedForm(const mat &r);
-    double waveFunction(const mat &r);
+    double localEnergyClosedForm(const state &astate);
+    double waveFunction(const state &astate);
 };
 
 #endif // WAFEFUNCTION_H

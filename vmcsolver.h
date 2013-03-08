@@ -15,11 +15,15 @@ public:
     VMCSolver(int myrank, int numprocs);
     ~VMCSolver();
     double runMonteCarloIntegration();
+    struct state{
+        double wavefunction;
+        mat r, rij, qForce, fij;
+    };
 
     int local_nCycles;
     int argc;
     char **argv;
-    double distij(const mat &r, const int i, const int j);
+    double distij(const state &astate, const int &i, const int &j);
     int nAccepted;
     int nRejected;
     int nLocalTotalsteps;
@@ -29,7 +33,7 @@ public:
     bool closedForm;
 
     double D;
-    mat quantumForce(const mat &r, const double &wavefunction);
+    mat quantumForce(const state &astate);
     int numprocs, myrank;
 
     double hydrogenWF(const int &i, vec3 &r);
@@ -40,24 +44,30 @@ public:
 
 
 
-    virtual double localEnergyClosedForm(const mat &r)=0;
-    virtual double waveFunction(const mat &r)=0;
+    virtual double localEnergyClosedForm(const state &astate)=0;
+    virtual double waveFunction(const state &astate)=0;
 
-    void calculaterij(const mat &r, mat &rij);
-    void updaterij(const mat &r, mat &rij, const int j);
+    void calculaterij(state &astate);
+    void updaterij(state &astate, const int &j);
     virtual double jastrowRatio(const int k)=0;
     virtual double sdratio()=0;
 
     void cycleIS(const int &i);
     void cycleWithoutIS(const int &i);
     double gaussianDeviate(long *seed);
-    double calcElementfij(const mat &rij, const int i, const int j);
-    void calculatefij(const mat &rij, mat &fij);
+    void calculatefij(state &astate);
+
+
+    state newS;
+    state oldS;
+    double calcElementfij(const state &astate, const int &i, const int &j);
+
+
 protected:
     double alpha;
     double beta;
 
-    double localEnergy(const mat &r);
+    double localEnergy(const state &astate);
 
     int nDimensions;
     int charge;

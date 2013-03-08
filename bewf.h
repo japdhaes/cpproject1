@@ -9,17 +9,18 @@ public:
     BeWF();
     BeWF(int myrank, int numprocs, double _alpha, double _beta);
 
-    double localEnergyClosedForm(const mat &r);
-    double waveFunction(const mat &r);
-    double aSDWF(const mat &r);
-    double wavefunction(const mat &r, const mat &fij);
-    double jastrowWF(const mat &fij);
-    double totalSD(const mat &r);
+    double localEnergyClosedForm(const state &astate);
+    double waveFunction(const state &astate);
+    double aSDWF(const state &astate);
+    double wavefunction(const state &astate);
+    double jastrowWF(const state &astate);
+    double totalSD(const state &astate);
 
     double jastrowRatio(const int k);
     double sdratio();
 
-//    double (BeWF::*hydrogenWF[2]) (const vec3 &position);
+    //    double (BeWF::*hydrogenWF[2]) (const vec3 &position);
+
 };
 
 #endif // BEWF_H

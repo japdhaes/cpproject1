@@ -11,7 +11,6 @@ quantum numbers involved, such as spin, orbital momentum and principal quantum n
 BeWF::BeWF(int myrank, int numprocs, double _alpha, double _beta):
     VMCSolver(myrank, numprocs)
 {
-    cout << " i am jonathan "<<endl;
     this->charge=4;
     this->nParticles=4;
     this->alpha=_alpha;
@@ -21,25 +20,27 @@ BeWF::BeWF(int myrank, int numprocs, double _alpha, double _beta):
 //    this->hydrogenWF[1]=&BeWF::phi2s2;
 }
 
-double BeWF::localEnergyClosedForm(const mat &r)
+double BeWF::localEnergyClosedForm(const state &astate)
 {
     cout << __LINE__<<endl;
     //impossible
     return 0;
 }
 
-double BeWF::waveFunction(const mat &r){
+double BeWF::waveFunction(const state &astate){
+    const mat r = astate.r;
 //    mat fij = calculatefij()
-                return totalSD(r);
+      return totalSD(astate);
 //    return this->aSDWF(r);
 }
 
 
-double BeWF::wavefunction(const mat &r, const mat &fij){
-    return aSDWF(r)*jastrowWF(fij);
+double BeWF::wavefunction(const state &astate){
+    return aSDWF(astate)*jastrowWF(astate);
 }
 
-double BeWF::jastrowWF(const mat &fij){
+double BeWF::jastrowWF(const state &astate){
+    const mat fij=astate.fij;
     double arg=0.0;
     for(int i=0; i<nParticles; i++){
         for(int j=i+1; j<nParticles;j++){
@@ -50,7 +51,8 @@ double BeWF::jastrowWF(const mat &fij){
     return exp(arg);
 }
 
-double BeWF::totalSD(const mat &r){
+double BeWF::totalSD(const state &astate){
+    const mat r = astate.r;
     int halfparticles=nParticles/2;
     mat sdup = zeros<mat>(halfparticles, halfparticles);
     mat sddown = zeros<mat>(halfparticles, halfparticles);
@@ -67,7 +69,7 @@ double BeWF::totalSD(const mat &r){
 }
 
 double BeWF::sdratio(){
-    return (waveFunctionNew*waveFunctionNew) / (waveFunctionOld*waveFunctionOld);
+    return (this->newS.wavefunction*this->newS.wavefunction) / (this->oldS.wavefunction*this->oldS.wavefunction);
 }
 
 double BeWF::jastrowRatio(int const k){
@@ -75,10 +77,10 @@ double BeWF::jastrowRatio(int const k){
     return 1.0;
     double dU=0.0;
     for(int i=0; i<k;i++){
-        dU+=calcElementfij(rijNew,i,k)-calcElementfij(rOld,i,k);
+        dU+=calcElementfij(this->newS,i,k)-calcElementfij(this->oldS,i,k);
     }
     for(int i=k+1; i<nParticles;i++){
-        dU+=calcElementfij(rijNew,k,i)-calcElementfij(rOld,k,i);
+        dU+=calcElementfij(this->newS,k,i)-calcElementfij(this->oldS,k,i);
     }
     return exp(dU);
 }
@@ -87,9 +89,10 @@ double BeWF::jastrowRatio(int const k){
 
 //explicitly the slater determinant split up between spin up and spin down particles
 //explicitly calculating determinant of the split up parts
-double BeWF::aSDWF(const mat &r)
+double BeWF::aSDWF(const state &astate)
 {
 //    cout << r<< endl;
+    const mat r=astate.r;
     double dist[nParticles];
     for(int i=0; i<nParticles;i++){
         dist[i]=0.0;

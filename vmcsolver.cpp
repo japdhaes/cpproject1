@@ -30,15 +30,13 @@ double VMCSolver::runMonteCarloIntegration()
     nAccepted=0;
     nRejected=0;
     //why a nparticles x ndimensions matrix? I have no clue what the point is of this structure.
-    rOld = zeros<mat>(nParticles, nDimensions);
-    rNew = zeros<mat>(nParticles, nDimensions);
 
-    rijOld = zeros<mat>(nParticles, nDimensions);
-    rijNew = zeros<mat>(nParticles, nDimensions);
-
-
-    waveFunctionOld = 0;
-    waveFunctionNew = 0;
+    this->oldS.r = zeros<mat>(nParticles, nDimensions);
+    this->oldS.rij = zeros<mat>(nParticles, nDimensions);
+    this->oldS.wavefunction = 0.0;
+    this->newS.r = zeros<mat>(nParticles, nDimensions);
+    this->newS.rij = zeros<mat>(nParticles, nDimensions);
+    this->newS.wavefunction = 0.0;
 
     double energySum = 0;
     double energySquaredSum = 0;
@@ -49,21 +47,24 @@ double VMCSolver::runMonteCarloIntegration()
     for(int i = 0; i < nParticles; i++) {
         for(int j = 0; j < nDimensions; j++) {
             if(!importanceSampling){
-                rOld(i,j) = stepLength * (ran2(&idum) - 0.5);
+                this->oldS.r(i,j) = stepLength * (ran2(&idum) - 0.5);
             } else {
 //                rOld(i,j) = DRanNormalZigVec()*sqrt(h);
-                rOld(i,j)=sqrt(h)*this->gaussianDeviate(&idum);
+                this->oldS.r(i,j)=sqrt(h)*this->gaussianDeviate(&idum);
             }
         }
     }
-    rNew = rOld;
+    this->newS.r = this->oldS.r;
 
     if(importanceSampling){
-        waveFunctionOld = waveFunction(rOld);
-        calculaterij(rOld, rijOld);
-        rijNew=rijOld;
+        waveFunction(this->oldS);
+//!!!        this->oldS.wavefunction = waveFunction(this->oldS.r);
+//!!!        calculaterij(this->oldS.r, this->oldS.rij);
+        calculaterij(this->oldS);
+        this->newS.rij=this->oldS.rij;
 //        fijOld = calculatefij(rijOld, )
-        qForceNew = qForceOld = quantumForce(rOld, waveFunctionOld) ;
+        this->newS.qForce = this->oldS.qForce = quantumForce(this->oldS);
+//!!!        qForceNew = qForceOld = quantumForce(rOld, waveFunctionOld) ;
     }
 
 
@@ -75,16 +76,15 @@ double VMCSolver::runMonteCarloIntegration()
 
     for(int cycle = my_start; cycle < my_end; cycle++) {
         // Store the current value of the wave function
-        waveFunctionOld = waveFunction(rOld);
+        waveFunction(this->oldS);
+//!!!        waveFunctionOld = waveFunction(rOld);
 
 
         // New position to test
         for(int i = 0; i < nParticles; i++) {
 
             if(importanceSampling){
-
                 this->cycleIS(i);
-
             }
             else{
                 this->cycleWithoutIS(i);
@@ -92,9 +92,11 @@ double VMCSolver::runMonteCarloIntegration()
 
             // update energies
             if(closedForm){
-                deltaE = localEnergyClosedForm(rNew);
+                deltaE = localEnergyClosedForm(this->newS);
+//!!!                deltaE = localEnergyClosedForm(rNew);
             } else {
-                deltaE = localEnergy(rNew);
+                deltaE = localEnergy(this->newS);
+//!!!                deltaE = localEnergy(rNew);
             }
 
             energySum += deltaE;
@@ -129,55 +131,83 @@ double VMCSolver::runMonteCarloIntegration()
     return totalenergy/numprocs;
 }
 
-double VMCSolver::calcElementfij(const mat &rij, int const i, int const j){
+double VMCSolver::calcElementfij(const state &astate, int const &i, int const &j){
+    mat rij=astate.rij;
     double a = ((i+j)%2==0)? 0.25 : 0.5;
     double b = rij(i,j);
 
     return a*b/(1.0+beta*b);
 }
 
-void VMCSolver::calculatefij(const mat &rij, mat &fij){
+
+//double VMCSolver::calcElementfij(const mat &rij, int const i, int const j){
+//    double a = ((i+j)%2==0)? 0.25 : 0.5;
+//    double b = rij(i,j);
+
+//    return a*b/(1.0+beta*b);
+//}
+
+void VMCSolver::calculatefij(state &astate){
+    mat fij=astate.fij;
+    mat rij=astate.rij;
     for(int i=0; i<nParticles;i++){
         for(int j=i+1; j<nParticles;j++){
-            fij(i,j)=calcElementfij(rij,i,j);
-            fij(j,i)=calcElementfij(rij,i,j);
+            fij(i,j)=calcElementfij(astate,i,j);
+            fij(j,i)=calcElementfij(astate,i,j);
         }
     }
+    if(astate.fij(0,0)!=fij(0,0)){
+        cout << "PROBLEM IN CALCFIJ"<<endl;
+    }
 }
+
+//void VMCSolver::calculatefij(const mat &rij, mat &fij){
+//    for(int i=0; i<nParticles;i++){
+//        for(int j=i+1; j<nParticles;j++){
+//            fij(i,j)=calcElementfij(rij,i,j);
+//            fij(j,i)=calcElementfij(rij,i,j);
+//        }
+//    }
+//}
 
 void VMCSolver::cycleIS(const int &i){
     for(int j = 0; j < nDimensions; j++) {
 //        rNew(i,j) = rOld(i,j) + DRanNormalZigVec()*sqrt(h)+qForceOld(i,j)*D*h;
-        rNew(i,j) = rOld(i,j) + this->gaussianDeviate(&idum)*sqrt(h)+qForceOld(i,j)*D*h;
+        this->newS.r(i,j)=this->oldS.r(i,j)+ this->gaussianDeviate(&idum)*sqrt(h)+this->oldS.qForce(i,j)*D*h;
+//        rNew(i,j) = rOld(i,j) + this->gaussianDeviate(&idum)*sqrt(h)+qForceOld(i,j)*D*h;
     }
 
 
     // Recalculate the value of the wave function
-    waveFunctionNew = waveFunction(rNew);
-    qForceNew=this->quantumForce(rNew, waveFunctionNew);
+    this->newS.wavefunction=waveFunction(this->newS);
+//    waveFunctionNew = waveFunction(rNew);
+//!!!    qForceNew=this->quantumForce(rNew, waveFunctionNew);
+    for(int j=0; j<nDimensions;j++){
+        this->newS.qForce(i,j)=this->quantumForce(this->newS)(i,j);
+    }
 
     // Check for step acceptance (if yes, update position, if no, reset position)
     //accepting
     double expratio = 0;
     for(int j=0; j<nDimensions;j++){
-        expratio+=(qForceOld(i,j)+qForceNew(i,j))*(D*h*(qForceOld(i,j)-qForceNew(i,j))+2.0*(rOld(i,j)-rNew(i,j)));
+        expratio+=(this->oldS.qForce(i,j)+this->newS.qForce(i,j))*(D*h*(this->oldS.qForce(i,j)-this->newS.qForce(i,j))+2.0*(this->oldS.r(i,j)-this->newS.r(i,j)));
     }
     expratio/=4.0;
     expratio=exp(expratio);
 
     if(ran2(&idum) <= expratio*this->sdratio()*this->jastrowRatio(i)) {
         for(int j = 0; j < nDimensions; j++) {
-            rOld(i,j) = rNew(i,j);
-            qForceOld(i,j)=qForceNew(i,j);
-            waveFunctionOld = waveFunctionNew;
+            this->oldS.r(i,j) = this->newS.r(i,j);
+            this->oldS.qForce(i,j)=this->newS.qForce(i,j);
+            this->oldS.wavefunction = this->newS.wavefunction;
         }
         nAccepted++;
     }
     //rejecting
     else {
         for(int j = 0; j < nDimensions; j++) {
-            rNew(i,j) = rOld(i,j);
-            qForceNew(i,j)=qForceOld(i,j);
+            this->newS.r(i,j) = this->oldS.r(i,j);
+            this->newS.qForce(i,j)=this->oldS.qForce(i,j);
         }
         nRejected++;
     }
@@ -185,60 +215,120 @@ void VMCSolver::cycleIS(const int &i){
 
 void VMCSolver::cycleWithoutIS(const int &i){
     for(int j = 0; j < nDimensions; j++) {
-        rNew(i,j) = rOld(i,j) + stepLength*(ran2(&idum) - 0.5);
+        this->newS.r(i,j) = this->oldS.r(i,j) + stepLength*(ran2(&idum) - 0.5);
     }
 
     // Recalculate the value of the wave function
-    waveFunctionNew = waveFunction(rNew);
-    calculaterij(rNew, rijNew);
+    this->newS.wavefunction = waveFunction(this->newS);
+//!!!    calculaterij(rNew, rijNew);
+    calculaterij(this->newS);
 
     //accepting
     if(ran2(&idum) <= this->sdratio()*this->jastrowRatio(i)) {
         for(int j = 0; j < nDimensions; j++) {
-            rOld(i,j) = rNew(i,j);
-            waveFunctionOld = waveFunctionNew;
-            rijOld(i,j)=rijNew(i,j);
+            this->oldS.r(i,j) = this->newS.r(i,j);
+            this->oldS.wavefunction = this->newS.wavefunction;
+            this->oldS.rij(i,j)=this->newS.rij(i,j);
         }
         nAccepted++;
     }
     //rejecting
     else {
         for(int j = 0; j < nDimensions; j++) {
-            rNew(i,j) = rOld(i,j);
-            rijNew(i,j)=rijOld(i,j);
+            this->newS.r(i,j) = this->oldS.r(i,j);
+            this->newS.rij(i,j)=this->oldS.rij(i,j);
         }
         nRejected++;
     }
 }
 
-mat VMCSolver::quantumForce(const mat &r, const double &wavefunction){
+//void VMCSolver::cycleWithoutIS(const int &i){
+//    for(int j = 0; j < nDimensions; j++) {
+//        rNew(i,j) = rOld(i,j) + stepLength*(ran2(&idum) - 0.5);
+//    }
+
+//    // Recalculate the value of the wave function
+//    waveFunctionNew = waveFunction(rNew);
+//    calculaterij(rNew, rijNew);
+
+//    //accepting
+//    if(ran2(&idum) <= this->sdratio()*this->jastrowRatio(i)) {
+//        for(int j = 0; j < nDimensions; j++) {
+//            rOld(i,j) = rNew(i,j);
+//            waveFunctionOld = waveFunctionNew;
+//            rijOld(i,j)=rijNew(i,j);
+//        }
+//        nAccepted++;
+//    }
+//    //rejecting
+//    else {
+//        for(int j = 0; j < nDimensions; j++) {
+//            rNew(i,j) = rOld(i,j);
+//            rijNew(i,j)=rijOld(i,j);
+//        }
+//        nRejected++;
+//    }
+//}
+
+mat VMCSolver::quantumForce(const state &astate){
+    state rPlus;
+    rPlus.r= zeros<mat>(nParticles, nDimensions);
+    state rMinus;
+    rMinus.r = zeros<mat>(nParticles, nDimensions);
     mat qforce(nParticles, nDimensions);
-    mat rPlus = zeros<mat>(nParticles, nDimensions);
-    mat rMinus = zeros<mat>(nParticles, nDimensions);
     double waveFunctionMinus, waveFunctionPlus;
-    rPlus = rMinus =r;
+    rPlus.r = rMinus.r =astate.r;
 
     for(int i = 0; i < nParticles; i++) {
         for(int j = 0; j < nDimensions; j++) {
-            rPlus(i,j) += h;
-            rMinus(i,j) -= h;
+            rPlus.r(i,j) += h;
+            rMinus.r(i,j) -= h;
             waveFunctionMinus = waveFunction(rMinus);
             waveFunctionPlus = waveFunction(rPlus);
             qforce(i,j) = waveFunctionPlus-waveFunctionMinus;
-            rPlus(i,j) = r(i,j);
-            rMinus(i,j) = r(i,j);
+            rPlus.r(i,j) = astate.r(i,j);
+            rMinus.r(i,j) = astate.r(i,j);
         }
     }
-    qforce/=(wavefunction*h);
+    qforce/=(astate.wavefunction*h);
     return qforce;
 }
 
-double VMCSolver::distij(const mat &r, const int i, const int j){
+
+//mat VMCSolver::quantumForce(const mat &r, const double &wavefunction){
+//    mat qforce(nParticles, nDimensions);
+//    mat rPlus = zeros<mat>(nParticles, nDimensions);
+//    mat rMinus = zeros<mat>(nParticles, nDimensions);
+//    double waveFunctionMinus, waveFunctionPlus;
+//    rPlus = rMinus =r;
+
+//    for(int i = 0; i < nParticles; i++) {
+//        for(int j = 0; j < nDimensions; j++) {
+//            rPlus(i,j) += h;
+//            rMinus(i,j) -= h;
+//            waveFunctionMinus = waveFunction(rMinus);
+//            waveFunctionPlus = waveFunction(rPlus);
+//            qforce(i,j) = waveFunctionPlus-waveFunctionMinus;
+//            rPlus(i,j) = r(i,j);
+//            rMinus(i,j) = r(i,j);
+//        }
+//    }
+//    qforce/=(wavefunction*h);
+//    return qforce;
+//}
+
+double VMCSolver::distij(const state &astate, const int &i, const int &j){
+    const mat r = astate.r;
     return norm(r.row(i)-r.row(j),2);
 }
 
-void VMCSolver::updaterij(const mat &r, mat &rij, const int j){
+//double VMCSolver::distij(const mat &r, const int i, const int j){
+//    return norm(r.row(i)-r.row(j),2);
+//}
 
+void VMCSolver::updaterij(state &astate, const int &j){
+    mat rij = astate.rij;
+    const mat r = astate.r;
     for(int i=0; i<j;i++){
         rij(i,j)=0.0;
         for(int k=0; k<nDimensions;k++){
@@ -256,7 +346,28 @@ void VMCSolver::updaterij(const mat &r, mat &rij, const int j){
     }
 }
 
-void VMCSolver::calculaterij(const mat &r, mat &rij){
+//void VMCSolver::updaterij(const mat &r, mat &rij, const int j){
+
+//    for(int i=0; i<j;i++){
+//        rij(i,j)=0.0;
+//        for(int k=0; k<nDimensions;k++){
+//            rij(i,j)+=(r(i,k)-r(j,k))*(r(i,k)-r(j,k));
+//        }
+//        rij(i,j)=sqrt(rij(i,j));
+
+//    }
+//    for(int i=j+1; i<nParticles;i++){
+//        rij(j,i)=0.0;
+//        for(int k=0; k<nDimensions;k++){
+//            rij(j,i)+=(r(i,k)-r(j,k))*(r(i,k)-r(j,k));
+//        }
+//        rij(j,i)=sqrt(rij(j,i));
+//    }
+//}
+
+void VMCSolver::calculaterij(state &astate){
+    mat rij = astate.rij;
+    const mat r = astate.r;
     rij.zeros();
     for(int i=0; i<nParticles; i++){
         for(int j=i+1; j<nParticles;j++){
@@ -269,31 +380,60 @@ void VMCSolver::calculaterij(const mat &r, mat &rij){
     }
 }
 
+//void VMCSolver::calculaterij(const mat &r, mat &rij){
+//    rij.zeros();
+//    for(int i=0; i<nParticles; i++){
+//        for(int j=i+1; j<nParticles;j++){
+//            rij(i,j)=0.0;
+//            for(int k=0; k<nDimensions;k++){
+//                rij(i,j)+=(r(i,k)-r(j,k))*(r(i,k)-r(j,k));
+//            }
+//            rij(i,j)=sqrt(rij(i,j));
+//        }
+//    }
+//}
 
-double VMCSolver::localEnergy(const mat &r)
+
+//void VMCSolver::calculaterij(const mat &r, mat &rij){
+//    rij.zeros();
+//    for(int i=0; i<nParticles; i++){
+//        for(int j=i+1; j<nParticles;j++){
+//            rij(i,j)=0.0;
+//            for(int k=0; k<nDimensions;k++){
+//                rij(i,j)+=(r(i,k)-r(j,k))*(r(i,k)-r(j,k));
+//            }
+//            rij(i,j)=sqrt(rij(i,j));
+//        }
+//    }
+//}
+
+
+double VMCSolver::localEnergy(const state &astate)
 {
-    mat rPlus = zeros<mat>(nParticles, nDimensions);
-    mat rMinus = zeros<mat>(nParticles, nDimensions);
+    state rPlus, rMinus;
+    rPlus.r = zeros<mat>(nParticles, nDimensions);
+    rMinus.r = zeros<mat>(nParticles, nDimensions);
+    const mat r = astate.r;
 
-    rPlus = rMinus =r;
+    rPlus.r = rMinus.r = astate.r;
 
-    double waveFunctionMinus = 0;
-    double waveFunctionPlus = 0;
+    rMinus.wavefunction = 0;
+    rPlus.wavefunction = 0;
 
-    double waveFunctionCurrent = waveFunction(r);
+    double waveFunctionCurrent = waveFunction(astate);
 
     // Kinetic energy
 
     double kineticEnergy = 0;
     for(int i = 0; i < nParticles; i++) {
         for(int j = 0; j < nDimensions; j++) {
-            rPlus(i,j) += h;
-            rMinus(i,j) -= h;
-            waveFunctionMinus = waveFunction(rMinus);
-            waveFunctionPlus = waveFunction(rPlus);
-            kineticEnergy -= (waveFunctionMinus + waveFunctionPlus - 2 * waveFunctionCurrent);
-            rPlus(i,j) = r(i,j);
-            rMinus(i,j) = r(i,j);
+            rPlus.r(i,j) += h;
+            rMinus.r(i,j) -= h;
+            rMinus.wavefunction = waveFunction(rMinus);
+            rPlus.wavefunction = waveFunction(rPlus);
+            kineticEnergy -= (rMinus.wavefunction + rPlus.wavefunction - 2 * waveFunctionCurrent);
+            rPlus.r(i,j) = astate.r(i,j);
+            rMinus.r(i,j) = astate.r(i,j);
         }
     }
     kineticEnergy = 0.5 * h2 * kineticEnergy / waveFunctionCurrent;
@@ -304,7 +444,7 @@ double VMCSolver::localEnergy(const mat &r)
     for(int i = 0; i < nParticles; i++) {
         rSingleParticle = 0;
         for(int j = 0; j < nDimensions; j++) {
-            rSingleParticle += r(i,j)*r(i,j);
+            rSingleParticle += astate.r(i,j)*astate.r(i,j);
         }
         potentialEnergy -= charge / sqrt(rSingleParticle);
     }
@@ -314,7 +454,7 @@ double VMCSolver::localEnergy(const mat &r)
         for(int j = i + 1; j < nParticles; j++) {
             r12 = 0;
             for(int k = 0; k < nDimensions; k++) {
-                r12 += (r(i,k) - r(j,k)) * (r(i,k) - r(j,k));
+                r12 += (astate.r(i,k) - astate.r(j,k)) * (astate.r(i,k) - astate.r(j,k));
             }
             potentialEnergy += 1 / sqrt(r12);
         }

@@ -26,11 +26,12 @@ double HeWF::jastrowRatio(int const k){
     return 1.0;
 }
 
-double HeWF::localEnergyClosedForm(const mat &r)
+double HeWF::localEnergyClosedForm(const state &astate)
 {
+    const mat r = astate.r;
     double r1=norm(r.row(0),2);
     double r2=norm(r.row(1),2);
-    double r12=distij(r, 0,1);
+    double r12=distij(astate, 0,1);
     double r1dotr2=0;
     for(int i=0; i<3; i++){
         r1dotr2+=r(0,i)*r(1,i);
@@ -44,8 +45,9 @@ double HeWF::localEnergyClosedForm(const mat &r)
     return EL2;
 }
 
-double HeWF::waveFunction(const mat &r)
+double HeWF::waveFunction(const state &astate)
 {
+    const mat r = astate.r;
     double r12 = 0;
     for(int i = 0; i < nParticles; i++) {
         for(int j = i + 1; j < nParticles; j++) {
