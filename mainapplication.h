@@ -4,20 +4,20 @@
 #include <iostream>
 #include "lib.h"
 #include <ctime>
-#include "vmcsolver.h"
-#include "hewf.h"
+#include "vmcbf.h"
+#include "vmcis.h"
 #include <unistd.h>
-#include "bewf.h"
+
 
 class MainApplication
 {
 public:
     MainApplication(int _myrank, int _numprocs);
-    void calculateCFImportanceSampling();
-    void calculateClosedForm();
-    void alphabetavalues();
-    void steplength_manually();
-    void steplength_secant();
+//    void calculateCFImportanceSampling();
+//    void calculateClosedForm();
+//    void alphabetavalues();
+//    void steplength_manually();
+//    void steplength_secant();
     void runApplication();
 
     int numprocs, myrank;

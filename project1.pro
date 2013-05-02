@@ -6,20 +6,24 @@ CONFIG -= qt
 SOURCES += main.cpp \
     vmcsolver.cpp \
     lib.cpp \
-    zigrandom.c \
-    zignor.c \
     mainapplication.cpp \
-    bewf.cpp \
-    hewf.cpp
+    slater.cpp \
+    orbital.cpp \
+    wavefunction.cpp \
+    jastrow.cpp \
+    vmcis.cpp \
+    vmcbf.cpp
 
 HEADERS += \
     vmcsolver.h \
     lib.h \
-    zigrandom.h \
-    zignor.h \
     mainapplication.h \
-    bewf.h \
-    hewf.h
+    slater.h \
+    orbital.h \
+    wavefunction.h \
+    jastrow.h \
+    vmcis.h \
+    vmcbf.h
 
 LIBS+= -larmadillo
 
