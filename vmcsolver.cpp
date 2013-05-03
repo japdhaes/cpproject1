@@ -8,7 +8,7 @@ VMCSolver::VMCSolver(int _myrank, int _numprocs, int _nParticles, double _alpha,
     nDimensions=3;
     numprocs=_numprocs;
     myrank=_myrank;
-    this->nCycles=1e4;
+    this->nCycles=1e5;
     idum=-1-myrank;
     h=1e-3;
     h2=1e6;
@@ -54,6 +54,8 @@ double VMCSolver::runMonteCarloIntegration()
 
 
     for(int cycle = my_start; cycle < my_end; cycle++) {
+        if(cycle%100==0)
+            cout << "Currently in cycle "<< cycle<<endl;
         // Store the current value of the wave function
         waveFunctionOld = wf.evaluate(rOld);
 

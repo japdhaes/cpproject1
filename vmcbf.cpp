@@ -16,6 +16,7 @@ void VMCBF::cycle(const int &i){
 
     // Recalculate the value of the wave function
     waveFunctionNew = wf.evaluate(rNew);
+//    cout << waveFunctionNew <<endl;
 
     //accepting
     if(ran2(&idum) <= wf.calcRatio()) {

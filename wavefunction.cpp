@@ -80,7 +80,7 @@ double Wavefunction::localEnergy(const mat &r)
         }
     }
 
-//    cout << "kinetic energy "<<kineticEnergy<< " potential energy " <<potentialEnergy<<endl;
+    cout << "kinetic energy "<<kineticEnergy<< " potential energy " <<potentialEnergy<<" total " << kineticEnergy + potentialEnergy<<endl;
     return kineticEnergy + potentialEnergy;
 }
 

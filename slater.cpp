@@ -159,12 +159,13 @@ void Slater::setSlaterNew(){
     else {
         int i = this->cp-this->hp;
         for(int j=0; j<this->hp;j++){
-            vec3 temp = rNew.row(this->cp);
+            rowvec temp = rNew.row(this->cp);
             this->sddownnew(i,j) = orbs.hydrogenWF(temp,j);
         }
     }
 }
 
+//debugged
 void Slater::updateSlaterAndInverse(){
     //spin UP
     if(spinup){
@@ -180,6 +181,7 @@ void Slater::updateSlaterAndInverse(){
     }
 }
 
+//debugged
 void Slater::rejectMove(){
     this->rNew.row(this->cp) = this->rOld.row(this->cp);
     //spin UP
@@ -194,6 +196,7 @@ void Slater::rejectMove(){
     }
 }
 
+//debugged
 void Slater::setNewSlaterInverse(){
     //ratio should already be calculated when checking to accept or reject the move!
     this->R=this->getRatio();

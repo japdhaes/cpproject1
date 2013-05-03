@@ -17,40 +17,39 @@ public:
     VMCSolver(int myrank, int numprocs, int _nParticles, double _alpha, double _beta);
     ~VMCSolver();
 
-    double          distij(const mat &r, const int i, const int j);
     double          gaussianDeviate(long *seed);
     double          runMonteCarloIntegration();
 
     virtual void    cycle(const int &i) = 0;
     virtual void    initialize() = 0;
+
 protected:
-    int nAccepted;
-    int nRejected;
-    int nLocalTotalsteps;
-    double deltaprobability;
-    int currentparticle;
-    bool closedForm;
-    int numprocs, myrank;
-    Wavefunction wf;
-    double alpha;
-    double beta;
-    int nDimensions;
-    int nParticles;
+    int             nAccepted;
+    int             nRejected;
+    int             nDimensions;
+    int             nParticles;
 
-    double h;
-    double h2;
+    double          deltaprobability;
+    int             currentparticle;
+    bool            closedForm;
 
-    long idum;
-    int nCycles;
+    double          h;
+    double          h2;
 
-    mat rOld;
-    mat rNew;
+    long            idum;
+    Wavefunction    wf;
 
-    double waveFunctionOld;
-    double waveFunctionNew;
-    int local_nCycles;
-    int argc;
-    char **argv;
+    mat             rOld;
+    mat             rNew;
+
+    double          waveFunctionOld;
+    double          waveFunctionNew;
+
+private:
+    int             local_nCycles;
+    int             nLocalTotalsteps;
+    int             numprocs, myrank;
+    int             nCycles;
 };
 
 #endif // VMCSOLVER_H

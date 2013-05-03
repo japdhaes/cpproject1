@@ -21,8 +21,8 @@ void MainApplication::runApplication(){
 
     //Neon
     int nParticles=10;
-    double alpha=10;
-    double beta=1.0;
+    double alpha=10.6;
+    double beta=0.1;
     cout <<"test"<<endl;
     VMCBF vmc=VMCBF(this->myrank, this->numprocs, nParticles, alpha, beta);
     cout <<"test"<<endl;
