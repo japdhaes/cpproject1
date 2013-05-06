@@ -44,14 +44,10 @@ double VMCSolver::runMonteCarloIntegration()
     }
 
     initialize();
-
-
-
     // loop over Monte Carlo cycles
     int my_start=0;
     int my_end=local_nCycles;
     double r12 = 0;
-
 
     for(int cycle = my_start; cycle < my_end; cycle++) {
         if(cycle%100==0)
@@ -71,7 +67,15 @@ double VMCSolver::runMonteCarloIntegration()
 //                deltaE = localEnergyClosedForm(rNew);
 //            } else {
 //            cout << rNew<<endl;
-                deltaE = wf.localEnergy(rNew);
+
+
+                //deltaE = wf.localEnergyNum(rNew);
+            deltaE = wf.localEnergyCF(rNew);
+
+//                cout << deltaE <<endl;
+
+//                cout << "correct delta E "<<deltaE<<endl;
+//                cout << "Kinetic energy closed form E "<< wf.localEnergyCF(rNew)<<endl;
 //                cout << deltaE<<endl;
 //            }
 
@@ -98,12 +102,13 @@ double VMCSolver::runMonteCarloIntegration()
 //    MPI_Allreduce(&r12, &total_r12, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(&nAccepted, &totalaccepted, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(&nRejected, &totalrejected, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-//    deltaP=double(totalaccepted)/(totalrejected+totalaccepted);
+    double acceptratio=double(totalaccepted)/(totalrejected+totalaccepted);
 
     double energySquared = energySquaredSum/(local_nCycles * nParticles);
     cout << "Energy: " << totalenergy/numprocs << " Energy (squared sum): " << energySquared << endl;
+    cout << "Variance: "<< energySquared-pow(totalenergy/numprocs,2)<<endl;
 //    cout << "Optimal position electrons: " << total_r12/numprocs << endl;
-//    cout << "Total deltaprobability: " <<deltaP << endl;
+    cout << "Total acceptratio: " <<acceptratio << endl;
 //    double totalenergy=0.0;
     return totalenergy/numprocs;
 }
@@ -121,4 +126,10 @@ double VMCSolver::gaussianDeviate(long *seed)
     R = sqrt(-2.0*log(ran2(seed)));
     randomNormal = R*cos(2.0*(pi) *ran2(seed));
     return randomNormal;
+}
+
+void VMCSolver::setCycles(int &_nCycles){
+    this->nCycles=_nCycles;
+    local_nCycles=nCycles/numprocs;
+    nLocalTotalsteps=nParticles*local_nCycles;
 }

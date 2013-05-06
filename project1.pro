@@ -27,6 +27,8 @@ HEADERS += \
 
 LIBS+= -larmadillo
 
+QMAKE_CXXFLAGS_WARN_ON += -Wno-reorder
+
 # MPI Settings
 QMAKE_CXX = mpicxx
 QMAKE_CXX_RELEASE = $$QMAKE_CXX

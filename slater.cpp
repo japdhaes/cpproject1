@@ -1,16 +1,5 @@
 #include "slater.h"
 
-//this my trial wave function class
-//Slater::Slater(int myrank, int numprocs, double _alpha, double _beta):
-//    VMCSolver(myrank, numprocs)
-//{
-//    this->charge=4;
-//    this->nParticles=this->charge;
-//    this->alpha=_alpha;
-//    this->beta=_beta;
-//    orbs=Orbital(this->alpha);
-//}
-
 Slater::Slater(double _alpha, int _nParticles){
     this->alpha=_alpha;
     this->nDimensions=3;
@@ -55,13 +44,6 @@ void Slater::initialize(const mat &r){
     this->sddowninversenew = this->sddowninverse;
 }
 
-double Slater::localEnergyClosedForm(const mat &r)
-{
-    cout << __LINE__<<endl;
-    //impossible
-    return 0;
-}
-
 double Slater::evaluate(){
     return det(sdup)*det(sddown);
 }
@@ -100,7 +82,6 @@ double Slater::calcRatio(){
         for(int j=0; j < this->hp; j++){
             this->R+=this->sdupnew(i,j)*this->sdupinverse(j,i);
         }
-//        cout << "R= "<<this->R << endl << "sdupnew "<<this->sdupnew<<"sdupinverseold"<< this->sdupinverse<<endl;
     }
     //spin DOWN
     else{
@@ -109,15 +90,24 @@ double Slater::calcRatio(){
             this->R+=this->sddownnew(i,j)*this->sddowninverse(j,i);
         }
     }
-
     return this->R;
 }
 
 //debugged
 void Slater::acceptMove(){
-    this->rOld.row(this->cp)=this->rNew.row(this->cp);
-    this->setNewSlaterInverse();
-    this->updateSlaterAndInverse();
+    this->rOld=this->rNew;
+    //spin UP
+    if(spinup){
+        int i=this->cp;
+        this->sdup.row(i) = this->sdupnew.row(i);
+        this->sdupinverse = this->sdupinversenew;
+    }
+    //spin DOWN
+    else{
+        int i=this->cp-this->hp;
+        this->sddown.row(i) = this->sddownnew.row(i);
+        this->sddowninverse = this->sddowninversenew;
+    }
 }
 
 void Slater::setAlpha(const double _alpha)
@@ -143,6 +133,7 @@ void Slater::setCurrentParticle(const int &i)
 void Slater::setNewPosition(const mat &r){
     this->rNew=r;
     this->setSlaterNew();
+    this->setNewSlaterInverse();
 }
 
 //debugged
@@ -166,40 +157,25 @@ void Slater::setSlaterNew(){
 }
 
 //debugged
-void Slater::updateSlaterAndInverse(){
-    //spin UP
-    if(spinup){
-        int i=this->cp;
-        this->sdup.row(i) = this->sdupnew.row(i);
-        this->sdupinverse = this->sdupinversenew;
-    }
-    //spin DOWN
-    else{
-        int i=this->cp-this->hp;
-        this->sddown.row(i) = this->sddownnew.row(i);
-        this->sddowninverse = this->sddowninversenew;
-    }
-}
-
-//debugged
 void Slater::rejectMove(){
     this->rNew.row(this->cp) = this->rOld.row(this->cp);
     //spin UP
     if(spinup){
-        int i = this->cp;
-        sdupnew.row(i) = sdup.row(i);
+        int i = cp;
+        this->sdupnew.row(i) = sdup.row(i);
+        this->sdupinversenew=this->sdupinverse;
     }
     //spin DOWN
     else{
         int i=this->cp-this->hp;
         this->sddownnew.row(i) = this->sddown.row(i);
+        this->sddowninversenew=this->sddowninverse;
     }
 }
 
 //debugged
 void Slater::setNewSlaterInverse(){
-    //ratio should already be calculated when checking to accept or reject the move!
-    this->R=this->getRatio();
+    this->R=this->calcRatio();
     this->S=zeros(1,this->hp);
 
     //spin UP
@@ -257,3 +233,40 @@ void Slater::setNewSlaterInverse(){
 
 }
 
+rowvec Slater::localGradient(const int &i){
+    //formula 72 on slides
+    rowvec answer(this->nDimensions);
+    answer.zeros();
+    rowvec temp=this->rNew.row(i);
+    bool spinup=(i<this->hp);
+    if(spinup){
+        for(int j=0; j<this->hp; j++){
+            //      gradient_i phi_j(r_i) *           d_ji^-1 (rNEW)
+            answer+=orbs.gradient(temp,j)*this->sdupinversenew(j,i);
+        }
+    }
+    else{
+        for(int j=0; j<this->hp; j++){
+            answer+=orbs.gradient(temp,j)*this->sddowninversenew(j,i);
+        }
+    }
+    return answer;
+}
+
+double Slater::localLaplacian(const int &i){
+    //formula 73 on slides
+    bool spinup=(i<this->hp);
+    double answer=0.0;
+    rowvec temp=this->rNew.row(i);
+    if(spinup){
+        for(int j=0; j<this->hp; j++){
+            answer+=orbs.laplacian(temp,j)*this->sdupinversenew(j,i);
+        }
+    }
+    else{
+        for(int j=0; j<this->hp; j++){
+            answer+=orbs.laplacian(temp,j)*this->sddowninversenew(j,i-this->hp);
+        }
+    }
+    return answer;
+}

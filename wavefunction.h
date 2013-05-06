@@ -21,11 +21,17 @@ public:
     void setCurrentParticle(const int &i);
 
     double evaluate(const mat &r);
-    double localEnergy(const mat &r);
+
+    double localEnergyNum(const mat &r);
 
     double getRatio();
     void setNewPos(const mat &r);
     double calcRatio();
+
+    double localEnergyCF(const mat &r);
+    double localKineticCF();
+    double potentialEnergy(const mat &r);
+    mat localGradient();
 protected:
     int nParticles;
     int nDimensions;
@@ -33,7 +39,6 @@ protected:
     double h, h2;
     int cp;
 
-    mat rNew, rOld;
     Slater slater;
     Jastrow jastrow;
 };

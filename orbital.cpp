@@ -133,7 +133,7 @@ double Orbital::phi2p(const vec &rvec, const int &k)
     }
     r = sqrt(r);
 
-    return alpha*rvec(k)*exp(-0.5*alpha*r);
+    return rvec(k)*exp(-0.5*alpha*r);
 }
 
 vec3 Orbital::dphi1s(const vec3 &rvec)
@@ -163,18 +163,18 @@ vec3 Orbital::dphi2s(const vec3 &rvec)
 vec3 Orbital::dphi2p(const vec3 &rvec, const int &k)
 {
     vec3 dphi;
-    r = 0.0;
+    double r2 = 0.0;
     for(int i = 0; i < nDimensions; i++){
-        r += rvec(i)*rvec(i);
+        r2 += rvec(i)*rvec(i);
     }
-    r = sqrt(r);
-    double arg = exp(-alpha*r/2.0);
-    for (int i = 0; i < nDimensions; i++)
-    {
-        dphi = -alpha*alpha/(2.0*r)*arg*rvec(i)*rvec(k);
-    }
-    dphi(k) += alpha*arg;
-
+    r = sqrt(r2);
+    dphi = -alpha * rvec(k) * rvec;
+//    for (int i = 0; i < nDimensions; i++)
+//    {
+//        dphi(i) = -alpha*rvec(i)*rvec(k);
+//    }
+    dphi(k) += 2*r;
+    dphi *= exp(-alpha*r/2.0)/(2*r);
     return dphi;
 }
 
@@ -207,6 +207,5 @@ double Orbital::ddphi2p(const vec &rvec, const int &k)
     }
     r = sqrt(r);
 
-    return pow(alpha, 2.0)*rvec(k)*(alpha*r - 8.0)*exp(-alpha*r/2.0)/(4.0*r);
+    return alpha*rvec(k)*(alpha*r - 8.0)*exp(-alpha*r/2.0)/(4.0*r);
 }
-

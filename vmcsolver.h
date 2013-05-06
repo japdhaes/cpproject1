@@ -23,6 +23,7 @@ public:
     virtual void    cycle(const int &i) = 0;
     virtual void    initialize() = 0;
 
+    void setCycles(int &_nCycles);
 protected:
     int             nAccepted;
     int             nRejected;

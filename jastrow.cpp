@@ -183,3 +183,85 @@ void Jastrow::rejectMove()
     fijNew.row(this->cp)=fij.row(this->cp);
     fijNew.col(this->cp)=fij.col(this->cp);
 }
+
+double Jastrow::localLaplacian(const int &k){
+    //formula on slide 175
+    double answer=0.0;
+    rowvec rk=rNew.row(k);
+    for(int i=0; i<this->nParticles;i++){
+        if(i!=k){
+            double temp=1.0+beta*rijNew(k,i);
+            //first sum in the large equation
+            for(int j=0; j<this->nParticles;j++){
+                if(j!=k){
+                    double rkirkj=dot(rk-rNew.row(i), rk-rNew.row(j));
+                    answer+=rkirkj/(rijNew(k,i)*rijNew(k,j))
+                            *a(k,i)*a(k,j)/
+                            pow((temp*(1+beta*rijNew(k,j))),2);
+                }
+            }
+            answer+=2.0*a(k,i)/(rijNew(k,i)*temp*temp);
+            answer-=2.0*a(k,i)*beta/(temp*temp*temp);
+        }
+    }
+    return answer;
+}
+
+double Jastrow::getLaplaceRatio(const mat &r){
+    double laplaceRatio = 0;
+    mat gradientRatio=this->getGradientRatio(rNew);
+    rowvec3 r12Vec; r12Vec.zeros();
+    for (int k = 0; k < nParticles; k++){
+        for (int i = 0; i < k; i++){
+            r12Vec = r.row(k) - r.row(i);
+            double r12 = sqrt(r12Vec(0)*r12Vec(0) + r12Vec(1)*r12Vec(1) + r12Vec(2)*r12Vec(2));
+            laplaceRatio += (nDimensions - 1)*dfdr(r12, k, i)/r12 + d2fdr2(r12, k, i);
+        }
+        for (int i = k + 1; i < nParticles; i++){
+            r12Vec = r.row(k) - r.row(i);
+            double r12 = sqrt(r12Vec(0)*r12Vec(0) + r12Vec(1)*r12Vec(1) + r12Vec(2)*r12Vec(2));
+            laplaceRatio += (nDimensions - 1)*dfdr(r12, k, i)/r12 + d2fdr2(r12, k, i);
+        }
+        laplaceRatio += gradientRatio(k,0)*gradientRatio(k,0) + gradientRatio(k,1)*gradientRatio(k,1)
+                        + gradientRatio(k,2)*gradientRatio(k,2);
+    }
+    return laplaceRatio;
+}
+double Jastrow::dfdr(const double &r12, const int &particleNum1, const int &particleNum2){
+    return a(particleNum1, particleNum2)/((1 + beta*r12)*(1 + beta*r12));
+}
+
+mat Jastrow::getGradientRatio(const mat &r){
+    mat gradientRatio = zeros(nParticles, nDimensions);
+    rowvec3 r12Vec; r12Vec.zeros();
+    for (int k = 0; k < nParticles; k++){
+        for (int i = 0; i < k; i++){
+            r12Vec = r.row(k) - r.row(i);
+            double r12 = sqrt(r12Vec(0)*r12Vec(0) + r12Vec(1)*r12Vec(1) + r12Vec(2)*r12Vec(2));
+            gradientRatio.row(k) += r12Vec*dfdr(r12, k, i)/r12;
+        }
+        for (int i = k + 1; i < nParticles; i++){
+            r12Vec = r.row(i) - r.row(k);
+            double r12 = sqrt(r12Vec(0)*r12Vec(0) + r12Vec(1)*r12Vec(1) + r12Vec(2)*r12Vec(2));
+            gradientRatio.row(k) -= r12Vec*dfdr(r12, k, i)/r12;
+        }
+    }
+    return gradientRatio;
+}
+
+double Jastrow::d2fdr2(const double &r12, const int &particleNum1, const int &particleNum2){
+    return -2*a(particleNum1, particleNum2)*beta/((1 + beta*r12)*(1 + beta*r12)*(1 + beta*r12));
+}
+
+rowvec Jastrow::localGradient(const int &k){
+    //formula on slide 178
+    rowvec answer(this->nDimensions);
+    answer.zeros();
+    for(int j=0; j<this->nParticles;j++){
+        if(j!=k){
+            double temp=1.0+beta*rijNew(k,j);
+            answer+=(a(k,j)/rijNew(k,j)/(temp*temp))*(rNew.row(k)-rNew.row(j));
+        }
+    }
+    return answer;
+}

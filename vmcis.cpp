@@ -1,7 +1,7 @@
 #include "vmcis.h"
 
 VMCIS::VMCIS(int myrank, int numprocs, int _nParticles, double _alpha, double _beta):
-    VMCSolver(myrank,numprocs,nParticles, _alpha, _beta),
+    VMCSolver(myrank,numprocs,_nParticles, _alpha, _beta),
     D(0.5)
 {
 
@@ -45,23 +45,24 @@ void VMCIS::cycle(const int &i){
 
 mat VMCIS::quantumForce(const mat &r, const double &wavefunction){
     mat qforce(nParticles, nDimensions);
-    mat rPlus = zeros<mat>(nParticles, nDimensions);
-    mat rMinus = zeros<mat>(nParticles, nDimensions);
-    double waveFunctionMinus, waveFunctionPlus;
-    rPlus = rMinus = r;
+    qforce=2.0*wf.localGradient();
+//    mat rPlus = zeros<mat>(nParticles, nDimensions);
+//    mat rMinus = zeros<mat>(nParticles, nDimensions);
+//    double waveFunctionMinus, waveFunctionPlus;
+//    rPlus = rMinus = r;
 
-    for(int i = 0; i < nParticles; i++) {
-        for(int j = 0; j < nDimensions; j++) {
-            rPlus(i,j) += h;
-            rMinus(i,j) -= h;
-            waveFunctionMinus = wf.evaluate(rMinus);
-            waveFunctionPlus = wf.evaluate(rPlus);
-            qforce(i,j) = waveFunctionPlus-waveFunctionMinus;
-            rPlus(i,j) = r(i,j);
-            rMinus(i,j) = r(i,j);
-        }
-    }
-    qforce/=(wavefunction*h);
+//    for(int i = 0; i < nParticles; i++) {
+//        for(int j = 0; j < nDimensions; j++) {
+//            rPlus(i,j) += h;
+//            rMinus(i,j) -= h;
+//            waveFunctionMinus = wf.evaluate(rMinus);
+//            waveFunctionPlus = wf.evaluate(rPlus);
+//            qforce(i,j) = waveFunctionPlus-waveFunctionMinus;
+//            rPlus(i,j) = r(i,j);
+//            rMinus(i,j) = r(i,j);
+//        }
+//    }
+//    qforce/=(wavefunction*h);
     return qforce;
 }
 

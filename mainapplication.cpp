@@ -9,24 +9,29 @@ MainApplication::MainApplication(int _myrank, int _numprocs):
 using namespace std;
 
 void MainApplication::runApplication(){
+    int nCycles=1e4;
+    bool importancesampling=true;
     //Helium
 //    int nParticles=2;
 //    double alpha=1.8;
 //    double beta=0.36;
 
     //Beryllium
-//    int nParticles=4;
-//    double alpha=3.8;
-//    double beta=0.1;
+    int nParticles=10;
+    double alpha=10;
+    double beta=0.2;
 
     //Neon
-    int nParticles=10;
-    double alpha=10.6;
-    double beta=0.1;
-    cout <<"test"<<endl;
-    VMCBF vmc=VMCBF(this->myrank, this->numprocs, nParticles, alpha, beta);
-    cout <<"test"<<endl;
+//    int nParticles=10;
+//    double alpha=10.6;
+//    double beta=0.1;
+
+    VMCIS vmc=VMCIS(this->myrank, this->numprocs, nParticles, alpha, beta);
+    vmc.setCycles(nCycles);
     vmc.runMonteCarloIntegration();
+
+    cout <<"test"<<endl;
+
 
 
 //    for(double alpha=3; alpha<4; alpha+=0.1){
