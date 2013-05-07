@@ -75,13 +75,8 @@ double Wavefunction::localKineticCF(){
     //slide 173
     double kin=0.0;
     for(int i=0; i<this->nParticles;i++){
-//        cout << "SLATERLAPLACIAN "<<slater.localLaplacian(i)<<endl;
         kin+=slater.localLaplacian(i);
-//        cout << "JASTROWLAPLACIAN "<<jastrow.localLaplacian(i)<<endl;
         kin+=jastrow.localLaplacian(i);
-//        cout << "DOTPRODUCT "<< 2.0*dot(slater.localGradient(i),jastrow.localGradient(i))<<endl;
-//        cout << "SLATERGRADIENT " << slater.localGradient(i) << endl;
-//        cout << "JASTROWGRADIENT " <<jastrow.localGradient(i)<<endl;
         kin+=2.0*dot(slater.localGradient(i),jastrow.localGradient(i));
     }
     kin*=-0.5;

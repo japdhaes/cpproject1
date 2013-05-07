@@ -51,6 +51,7 @@ mat VMCIS::quantumForce(){
 
 void VMCIS::initialize()
 {
+    solverInitializer();
     rNew = rOld;
     wf.initialize(rOld);
     waveFunctionOld = wf.evaluate(rOld);

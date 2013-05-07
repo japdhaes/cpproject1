@@ -7,6 +7,7 @@
 #include "vmcbf.h"
 #include "vmcis.h"
 #include <unistd.h>
+#include "testdirectory.h"
 
 
 class MainApplication
@@ -22,9 +23,8 @@ public:
 
     int numprocs, myrank;
 
-
-    void runBeryllium();
-    void runBeryllium(double alpha, double beta);
+    void runSimulation();
+    void simulateWithOutput(int nParticles, double alpha, double beta);
 };
 
 #endif // MAINAPPLICATION_H

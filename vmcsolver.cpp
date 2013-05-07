@@ -2,7 +2,8 @@
 
 //source github.com/ComputationalPhysics
 VMCSolver::VMCSolver(int _myrank, int _numprocs, int _nParticles, double _alpha, double _beta):
-    wf(_nParticles,_alpha,_beta)
+    wf(_nParticles,_alpha,_beta),
+    createOutput(false)
 {
     this->nParticles=_nParticles;
     nDimensions=3;
@@ -50,11 +51,15 @@ double VMCSolver::runMonteCarloIntegration()
     double r12 = 0;
 
     for(int cycle = my_start; cycle < my_end; cycle++) {
-        if(cycle%100==0)
+
+        if(cycle%(my_end/100)==0)
             cout << "Currently in cycle "<< cycle<<endl;
+        if(cycle%nrOfCyclesEachOutput==0 && createOutput && cycle >0){
+            datalogger.flushData();
+        }
+
         // Store the current value of the wave function
         waveFunctionOld = wf.evaluate(rOld);
-
 
         // New position to test
         for(int i = 0; i < nParticles; i++) {
@@ -62,29 +67,20 @@ double VMCSolver::runMonteCarloIntegration()
             wf.setCurrentParticle(i);
             this->cycle(i);
 
-            // update energies
-//            if(closedForm){
-//                deltaE = localEnergyClosedForm(rNew);
-//            } else {
-//            cout << rNew<<endl;
-
-
-                //deltaE = wf.localEnergyNum(rNew);
+            //collect data
             deltaE = wf.localEnergyCF(rNew);
-
-//                cout << deltaE <<endl;
-
-//                cout << "correct delta E "<<deltaE<<endl;
-//                cout << "Kinetic energy closed form E "<< wf.localEnergyCF(rNew)<<endl;
-//                cout << deltaE<<endl;
-//            }
-
+            if(createOutput){
+                datalogger.addData(deltaE);
+            }
             energySum += deltaE;
             energySquaredSum += deltaE*deltaE;
-
         }
+
         //r12+=distij(rNew, 0, 1);
 //        r12+=norm(rNew.row(0),2);
+    }
+    if(createOutput){
+        datalogger.flushFinalData();
     }
 
 //    r12/=local_nCycles;
@@ -128,8 +124,27 @@ double VMCSolver::gaussianDeviate(long *seed)
     return randomNormal;
 }
 
-void VMCSolver::setCycles(int &_nCycles){
+void VMCSolver::setCycles(const int &_nCycles){
     this->nCycles=_nCycles;
     local_nCycles=nCycles/numprocs;
+    cout << local_nCycles<<endl;
     nLocalTotalsteps=nParticles*local_nCycles;
+}
+
+void VMCSolver::setOutput(bool output){
+    this->createOutput=output;
+}
+
+void VMCSolver::setOutputDirectory(const string &directoryName){
+    this->outputDirectory=directoryName;
+}
+
+void VMCSolver::solverInitializer(){
+    if(createOutput){
+        ostringstream temp;
+        temp << outputDirectory << "data"<< myrank<<".dat";
+        this->outputFilename=temp.str();
+        datalogger=Datalogger(temp.str(),nrOfCyclesEachOutput*nParticles);
+        datalogger.initialize();
+    }
 }

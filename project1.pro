@@ -12,7 +12,9 @@ SOURCES += main.cpp \
     wavefunction.cpp \
     jastrow.cpp \
     vmcis.cpp \
-    vmcbf.cpp
+    vmcbf.cpp \
+    testdirectory.cpp \
+    datalogger.cpp
 
 HEADERS += \
     vmcsolver.h \
@@ -23,7 +25,9 @@ HEADERS += \
     wavefunction.h \
     jastrow.h \
     vmcis.h \
-    vmcbf.h
+    vmcbf.h \
+    testdirectory.h \
+    datalogger.h
 
 LIBS+= -larmadillo
 

@@ -6,8 +6,10 @@
 #include <mpi.h>
 #include "orbital.h"
 #include "wavefunction.h"
+#include "datalogger.h"
 
 const double pi=3.1415926535;
+const int nrOfCyclesEachOutput=1e4;
 
 using namespace arma;
 
@@ -22,8 +24,14 @@ public:
 
     virtual void    cycle(const int &i) = 0;
     virtual void    initialize() = 0;
+    void            solverInitializer();
 
-    void setCycles(int &_nCycles);
+    void            setCycles(const int &_nCycles);
+
+
+    void            setOutput(bool output);
+    void            setOutputDirectory(const string &directoryName);
+
 protected:
     int             nAccepted;
     int             nRejected;
@@ -51,6 +59,13 @@ private:
     int             nLocalTotalsteps;
     int             numprocs, myrank;
     int             nCycles;
+
+
+    bool            createOutput;
+    string          outputDirectory;
+    string          outputFilename;
+    Datalogger      datalogger;
+
 };
 
 #endif // VMCSOLVER_H

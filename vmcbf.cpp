@@ -32,6 +32,7 @@ void VMCBF::cycle(const int &i){
 
 void VMCBF::initialize()
 {
+    solverInitializer();
     rNew = rOld;
     wf.initialize(rOld);
 }

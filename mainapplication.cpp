@@ -9,7 +9,81 @@ MainApplication::MainApplication(int _myrank, int _numprocs):
 using namespace std;
 
 void MainApplication::runApplication(){
-    int nCycles=1e4;
+//    runSimulation();
+    simulateWithOutput(2, 0.5, 0.5);
+}
+
+void MainApplication::simulateWithOutput(int nParticles, double alpha, double beta){
+    TestDirectory test;
+    ostringstream outputfolder;
+    outputfolder << "/home/jonathan/projectsCP/project1/data/";
+    //creating outputdirectory
+    if(!test.DirectoryExists(outputfolder.str().c_str())){
+        cout << "Output directory doesn't exist."<<endl;
+        cout << "Creating output directory "<<outputfolder.str()<<endl;
+        ostringstream systemmessage;
+        systemmessage << "mkdir "<<outputfolder.str();
+        system(systemmessage.str().c_str());
+    }
+    //test if creating outputdirectory worked
+    if(!test.DirectoryExists(outputfolder.str().c_str())){
+        cout << "Error in creating output directory. ";
+        cout << "Change output directory in the script and make sure that the program ";
+        cout << "is having the correct permissions to create the output directory. "<<endl;
+        exit(1);
+    }
+    //test number of particles
+    if(nParticles !=2 && nParticles != 4 && nParticles != 10){
+        cout << "The program is being run with "<<nParticles<< " particles. ";
+        cout << "The program has never been tested with this number of particles, ";
+        cout << "so the produced data may contain errors. "<<endl;
+    }
+    //creating outputfolder for data
+    if(nParticles == 2){
+        outputfolder << "helium/";
+    }
+    else if(nParticles == 4){
+        outputfolder << "beryllium/";
+    }
+    else if (nParticles == 10){
+        outputfolder << "neon/";
+    }
+    else{
+        outputfolder << nParticles<<"particles/";
+    }
+    if(!test.DirectoryExists(outputfolder.str().c_str())){
+        cout << "Output directory for specific atom doesn't exist."<<endl;
+        cout << "Creating output directory "<<outputfolder.str()<<endl;
+        ostringstream systemmessage;
+        systemmessage << "mkdir "<<outputfolder.str();
+        system(systemmessage.str().c_str());
+    }
+    //test if creating outputdirectory worked
+    if(!test.DirectoryExists(outputfolder.str().c_str())){
+        cout << "Error in creating output directory. ";
+        cout << "Change output directory in the script and make sure that the program ";
+        cout << "is having the correct permissions to create the output directory. "<<endl;
+        exit(1);
+    }
+    //Beryllium
+//    int nParticles=10;
+//    double alpha=10;
+//    double beta=0.2;
+
+    //Neon
+//    int nParticles=10;
+//    double alpha=10.6;
+//    double beta=0.1;
+
+    VMCIS vmc=VMCIS(this->myrank, this->numprocs, nParticles, alpha, beta);
+    vmc.setCycles(1e5);
+    vmc.setOutput(true);
+    vmc.setOutputDirectory(outputfolder.str().c_str());
+    vmc.runMonteCarloIntegration();
+}
+
+void MainApplication::runSimulation(){
+    int nCycles=1e5;
     bool importancesampling=true;
     //Helium
 //    int nParticles=2;
@@ -29,20 +103,8 @@ void MainApplication::runApplication(){
     VMCIS vmc=VMCIS(this->myrank, this->numprocs, nParticles, alpha, beta);
     vmc.setCycles(nCycles);
     vmc.runMonteCarloIntegration();
-
-    cout <<"test"<<endl;
-
-
-
-//    for(double alpha=3; alpha<4; alpha+=0.1){
-//        for(double beta=0.5; beta<5; beta+=0.5){
-//            if(myrank==0)
-//            cout << alpha << " "<<beta<<endl;
-////            runBeryllium(alpha, beta);
-//        }
-//    }
-
 }
+
 
 //void MainApplication::runBeryllium(double alpha, double beta){
 ////    double alpha =3.5;
