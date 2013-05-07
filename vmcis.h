@@ -6,7 +6,7 @@ class VMCIS:public VMCSolver
 {
 public:
     VMCIS(int myrank, int numprocs, int _nParticles, double _alpha, double _beta);
-    mat quantumForce(const mat &r, const double &wavefunction);
+    mat quantumForce();
     void initialize();
     void cycle(const int &i);
 private:

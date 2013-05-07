@@ -147,6 +147,7 @@ double Jastrow::calcRatio()
 {
     double arg=0.0;
     int i=this->cp;
+
 //    cout << "new"<<fijNew<<endl;
 //    cout <<"old"<<fij<<endl;
     for(int j=0; j<i; j++){

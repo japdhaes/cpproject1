@@ -247,7 +247,7 @@ rowvec Slater::localGradient(const int &i){
     }
     else{
         for(int j=0; j<this->hp; j++){
-            answer+=orbs.gradient(temp,j)*this->sddowninversenew(j,i);
+            answer+=orbs.gradient(temp,j)*this->sddowninversenew(j,i-this->hp);
         }
     }
     return answer;

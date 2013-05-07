@@ -26,7 +26,7 @@ void Wavefunction::initialize(const mat &r){
 
 double Wavefunction::evaluate(const mat &r)
 {
-    return /*jastrow.evaluate(r)**/slater.evaluate(r);
+    return jastrow.evaluate(r)*slater.evaluate(r);
 }
 
 
@@ -44,7 +44,7 @@ void Wavefunction::setNewPos(const mat &r){
 }
 
 double Wavefunction::calcRatio(){
-    double ans=this->slater.calcRatio()/**this->jastrow.calcRatio()*/;
+    double ans=this->slater.calcRatio()*this->jastrow.calcRatio();
     return ans*ans;
 }
 
@@ -66,6 +66,7 @@ void Wavefunction::rejectMove(){
 double Wavefunction::localEnergyCF(const mat &r){
     double kinetic=localKineticCF();
     double potential=this->potentialEnergy(r);
+//    cout << r << endl;
 //    cout << "CLOSED FORM: Kin " << kinetic << " pot " << potential << " tot " << kinetic+potential<<endl;
     return kinetic+potential;
 }
@@ -73,15 +74,15 @@ double Wavefunction::localEnergyCF(const mat &r){
 double Wavefunction::localKineticCF(){
     //slide 173
     double kin=0.0;
-//    cout << "SLATERDETERMINANT "<< slater.evaluate()<<endl;
     for(int i=0; i<this->nParticles;i++){
+//        cout << "SLATERLAPLACIAN "<<slater.localLaplacian(i)<<endl;
         kin+=slater.localLaplacian(i);
-//        cout << "i "<<i<<" slaterlaplacian " <<slater.localLaplacian(i)<<endl;
-//        kin+=jastrow.localLaplacian(i);
-//        cout << "my laplacian "<<jastrow.localLaplacian(i)<<endl;
-//        cout << "henrik laplacian "<<jastrow.getLaplaceRatio(rNew)<<endl;
-////        cout << "i "<<i<<" slatergradient " << slater.localGradient(i)<<endl;
-//        kin+=2.0*dot(slater.localGradient(i),jastrow.localGradient(i));
+//        cout << "JASTROWLAPLACIAN "<<jastrow.localLaplacian(i)<<endl;
+        kin+=jastrow.localLaplacian(i);
+//        cout << "DOTPRODUCT "<< 2.0*dot(slater.localGradient(i),jastrow.localGradient(i))<<endl;
+//        cout << "SLATERGRADIENT " << slater.localGradient(i) << endl;
+//        cout << "JASTROWGRADIENT " <<jastrow.localGradient(i)<<endl;
+        kin+=2.0*dot(slater.localGradient(i),jastrow.localGradient(i));
     }
     kin*=-0.5;
     return kin;
@@ -99,16 +100,16 @@ double Wavefunction::potentialEnergy(const mat &r){
         potentialEnergy -= charge / sqrt(rSingleParticle);
     }
     // Contribution from electron-electron potential
-//    double r12 = 0;
-//    for(int i = 0; i < nParticles; i++) {
-//        for(int j = i + 1; j < nParticles; j++) {
-//            r12 = 0;
-//            for(int k = 0; k < nDimensions; k++) {
-//                r12 += (r(i,k) - r(j,k)) * (r(i,k) - r(j,k));
-//            }
-//            potentialEnergy += 1 / sqrt(r12);
-//        }
-//    }
+    double r12 = 0;
+    for(int i = 0; i < nParticles; i++) {
+        for(int j = i + 1; j < nParticles; j++) {
+            r12 = 0;
+            for(int k = 0; k < nDimensions; k++) {
+                r12 += (r(i,k) - r(j,k)) * (r(i,k) - r(j,k));
+            }
+            potentialEnergy += 1 / sqrt(r12);
+        }
+    }
     return potentialEnergy;
 }
 

@@ -15,7 +15,7 @@ void VMCIS::cycle(const int &i){
 
     // Recalculate the value of the wave function
     waveFunctionNew = wf.evaluate(rNew);
-    qForceNew=this->quantumForce(rNew, waveFunctionNew);
+    qForceNew=this->quantumForce();
 
     // Check for step acceptance (if yes, update position, if no, reset position)
     double expratio = 0.0;
@@ -28,7 +28,7 @@ void VMCIS::cycle(const int &i){
     expratio=exp(expratio);
 
     //accepting
-    if(ran2(&idum) <= expratio*wf.getRatio()) {
+    if(ran2(&idum) <= expratio*wf.calcRatio()) {
         wf.acceptMove();
         rOld.row(i)=rNew.row(i);
         qForceOld=qForceNew;
@@ -43,26 +43,9 @@ void VMCIS::cycle(const int &i){
     }
 }
 
-mat VMCIS::quantumForce(const mat &r, const double &wavefunction){
+mat VMCIS::quantumForce(){
     mat qforce(nParticles, nDimensions);
     qforce=2.0*wf.localGradient();
-//    mat rPlus = zeros<mat>(nParticles, nDimensions);
-//    mat rMinus = zeros<mat>(nParticles, nDimensions);
-//    double waveFunctionMinus, waveFunctionPlus;
-//    rPlus = rMinus = r;
-
-//    for(int i = 0; i < nParticles; i++) {
-//        for(int j = 0; j < nDimensions; j++) {
-//            rPlus(i,j) += h;
-//            rMinus(i,j) -= h;
-//            waveFunctionMinus = wf.evaluate(rMinus);
-//            waveFunctionPlus = wf.evaluate(rPlus);
-//            qforce(i,j) = waveFunctionPlus-waveFunctionMinus;
-//            rPlus(i,j) = r(i,j);
-//            rMinus(i,j) = r(i,j);
-//        }
-//    }
-//    qforce/=(wavefunction*h);
     return qforce;
 }
 
@@ -71,5 +54,5 @@ void VMCIS::initialize()
     rNew = rOld;
     wf.initialize(rOld);
     waveFunctionOld = wf.evaluate(rOld);
-    qForceNew = qForceOld = quantumForce(rOld, waveFunctionOld) ;
+    qForceNew = qForceOld = quantumForce() ;
 }
