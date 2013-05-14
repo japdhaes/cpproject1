@@ -21,6 +21,7 @@ void Datalogger::flushData(){
 
 void Datalogger::flushFinalData(){
     for(int j=0; j<i;j++){
+//        myFile.write (data(j), 100);
         (*myoutputFile) << data(j) << endl;
     }
     (*myoutputFile).close();
@@ -28,7 +29,7 @@ void Datalogger::flushFinalData(){
 
 void Datalogger::initialize(){
     this->myoutputFile=new ofstream();
-    this->myoutputFile->open(outputFilename.c_str(),std::fstream::out);
+    this->myoutputFile->open(outputFilename.c_str(), ios::out |std::ios::binary);
 }
 
 //ostringstream temp;

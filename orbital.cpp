@@ -209,3 +209,29 @@ double Orbital::ddphi2p(const vec &rvec, const int &k)
 
     return alpha*rvec(k)*(alpha*r - 8.0)*exp(-alpha*r/2.0)/(4.0*r);
 }
+
+double Orbital::alphaGradient(const rowvec &rvec, const int &qNum)
+{
+    double r = 0.0;
+    for (int i = 0; i < nDimensions; i++)
+        r += rvec(i)*rvec(i);
+    r = sqrt(r);
+
+    switch (qNum)
+    {
+    case 0 :
+        return -r*exp(-alpha*r);
+    case 1 :
+        return r*(alpha*r - 4.0)*exp(-alpha*r/2.0)/4.0;
+    case 2 :
+        return -rvec(0)*(alpha*r - 2.0)*exp(-alpha*r/2.0)/2.0;
+    case 3 :
+        return -rvec(1)*(alpha*r - 2.0)*exp(-alpha*r/2.0)/2.0;
+    case 4 :
+        return -rvec(2)*(alpha*r - 2.0)*exp(-alpha*r/2.0)/2.0;
+    default :
+        cout << "Please implement more hydrogen wavefunctions" << endl;
+        exit(1);
+    }
+}
+

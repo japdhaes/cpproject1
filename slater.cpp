@@ -113,6 +113,7 @@ void Slater::acceptMove(){
 void Slater::setAlpha(const double _alpha)
 {
     this->alpha=_alpha;
+    this->orbs.setAlpha(_alpha);
 }
 
 //debugged
@@ -269,4 +270,45 @@ double Slater::localLaplacian(const int &i){
         }
     }
     return answer;
+}
+
+mat Slater::gradient(const mat &r, const double &h)
+{
+    mat rPlus, rMinus;
+    rPlus = rMinus = r;
+    mat temp(nParticles, nDimensions);
+    double wfCurrent = evaluate(r);
+    double dfactor = 1.0/(wfCurrent*2.0*h);
+    for (int i = 0; i < nParticles; i++)
+    {
+        for (int j = 0; j < nDimensions; j++)
+        {
+            rPlus(i,j) += h;
+            rMinus(i,j) -= h;
+            double wfMinus = evaluate(rMinus);
+            double wfPlus = evaluate(rPlus);
+            temp(i,j) = (wfPlus - wfMinus)*dfactor;
+            rPlus(i,j) = rMinus(i,j) = r(i,j);
+        }
+    }
+
+    return temp;
+}
+
+double Slater::alphaGradient(const int &i)
+{
+    /* Calculates the gradient for particle i */
+    double delta = 0.0;
+    if (i < this->hp){
+        for (int j = 0; j < this->hp; j++){
+            delta += orbs.alphaGradient(rNew.row(i),j)*this->sdupinversenew(j,i);
+        }
+    }
+    else{
+        for (int j = 0; j < this->hp; j++){
+            delta += orbs.alphaGradient(rNew.row(i),j)*this->sddowninversenew(j,i-this->hp);
+        }
+    }
+
+    return delta;
 }

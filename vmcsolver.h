@@ -9,7 +9,8 @@
 #include "datalogger.h"
 
 const double pi=3.1415926535;
-const int nrOfCyclesEachOutput=1e4;
+const int nrOfCyclesEachOutput=1e6;
+const int thermalizingSteps=1e4;
 
 using namespace arma;
 
@@ -32,6 +33,8 @@ public:
     void            setOutput(bool output);
     void            setOutputDirectory(const string &directoryName);
 
+    void thermalize();
+    void setAlphaBeta(double alpha, double beta);
 protected:
     int             nAccepted;
     int             nRejected;
@@ -56,7 +59,6 @@ protected:
 
 private:
     int             local_nCycles;
-    int             nLocalTotalsteps;
     int             numprocs, myrank;
     int             nCycles;
 

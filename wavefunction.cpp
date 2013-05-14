@@ -16,6 +16,10 @@ void Wavefunction::setAlpha(const double alpha){
 }
 
 void Wavefunction::setBeta(const double beta){
+    if(beta<0){
+        cout << "Setting a negative beta value. Exiting."<<endl;
+        exit(1);
+    }
     this->jastrow.setBeta(beta);
 }
 

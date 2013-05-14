@@ -34,6 +34,8 @@ public:
     rowvec localGradient(const int &i);
     double localLaplacian(const int &i);
     double localLaplacian2(const int &i);
+    mat gradient(const mat &r, const double &h);
+    double alphaGradient(const int &i);
 protected:
     int nDimensions;
     int nParticles;

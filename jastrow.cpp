@@ -12,6 +12,10 @@ Jastrow::Jastrow(double _beta, int _nParticles):
     fij(zeros<mat>(_nParticles,_nParticles)),
     fijNew(zeros<mat>(_nParticles,_nParticles))
 {
+    if(_beta<0.0){
+        cout << "Initializing Jastrow with a negative beta value. Exiting. "<<endl;
+        exit(1);
+    }
     initialize_a();
 }
 
@@ -265,4 +269,14 @@ rowvec Jastrow::localGradient(const int &k){
         }
     }
     return answer;
+}
+
+double Jastrow::betaGradient(const int &k)
+{
+    double delta = 0.0;
+    for(int i=0; i<this->nParticles;i++){
+        double rijtemp = rijNew(i,k);
+        delta -=a(i,k)*rijtemp*rijtemp/((beta*rijtemp + 1.0)*(beta*rijtemp + 1.0));
+    }
+    return delta;
 }

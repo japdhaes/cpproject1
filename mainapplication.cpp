@@ -10,7 +10,24 @@ using namespace std;
 
 void MainApplication::runApplication(){
 //    runSimulation();
-    simulateWithOutput(2, 0.5, 0.5);
+    //simulateWithOutput(10, 9.95, 0.18);
+    //minimizeBruteForce();
+    minimizeNM();
+}
+
+void MainApplication::minimizeBruteForce(){
+    Minimizer minimizer(myrank,numprocs, 2);
+    minimizer.bruteForce(2, 0, 2, 0, 1);
+}
+
+void MainApplication::minimizeNM(){
+    Minimizer minimizer(myrank, numprocs, 4);
+    minimizer.nelderMeadMethod();
+}
+
+void MainApplication::blockData(){
+    Blocking blocking("/home/jonathan/projectsCP/project1/data/helium/");
+    blocking.doBlocking();
 }
 
 void MainApplication::simulateWithOutput(int nParticles, double alpha, double beta){
@@ -76,10 +93,23 @@ void MainApplication::simulateWithOutput(int nParticles, double alpha, double be
 //    double beta=0.1;
 
     VMCIS vmc=VMCIS(this->myrank, this->numprocs, nParticles, alpha, beta);
-    vmc.setCycles(1e5);
+    vmc.setCycles(1e6);
     vmc.setOutput(true);
     vmc.setOutputDirectory(outputfolder.str().c_str());
     vmc.runMonteCarloIntegration();
+}
+
+void MainApplication::runSimulation(bool importancesampling, int nCycles, int nParticles, double alpha, double beta){
+    if(importancesampling){
+        VMCIS vmc=VMCIS(this->myrank, this->numprocs, nParticles, alpha, beta);
+        vmc.setCycles(nCycles);
+        vmc.runMonteCarloIntegration();
+    }
+    else{
+        VMCBF vmc=VMCBF(this->myrank, this->numprocs, nParticles, alpha, beta);
+        vmc.setCycles(nCycles);
+        vmc.runMonteCarloIntegration();
+    }
 }
 
 void MainApplication::runSimulation(){

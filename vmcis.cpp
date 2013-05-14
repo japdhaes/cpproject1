@@ -7,6 +7,7 @@ VMCIS::VMCIS(int myrank, int numprocs, int _nParticles, double _alpha, double _b
 
 }
 
+
 void VMCIS::cycle(const int &i){
     for(int j = 0; j < nDimensions; j++) {
         rNew(i,j) = rOld(i,j) + this->gaussianDeviate(&idum)*sqrt(h)+qForceOld(i,j)*D*h;

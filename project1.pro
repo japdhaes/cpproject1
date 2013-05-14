@@ -14,7 +14,9 @@ SOURCES += main.cpp \
     vmcis.cpp \
     vmcbf.cpp \
     testdirectory.cpp \
-    datalogger.cpp
+    datalogger.cpp \
+    blocking.cpp \
+    minimizer.cpp
 
 HEADERS += \
     vmcsolver.h \
@@ -27,7 +29,9 @@ HEADERS += \
     vmcis.h \
     vmcbf.h \
     testdirectory.h \
-    datalogger.h
+    datalogger.h \
+    blocking.h \
+    minimizer.h
 
 LIBS+= -larmadillo
 

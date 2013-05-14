@@ -26,6 +26,7 @@ public:
     double ddphi2s(const vec &rvec);
     double ddphi2p(const vec &rvec, const int &k);
     double phi2s(const double &r);
+    double alphaGradient(const rowvec &rvec, const int &qNum);
 private:
     int nDimensions;
     double wfCurrent;

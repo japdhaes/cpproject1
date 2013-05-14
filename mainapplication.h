@@ -8,7 +8,8 @@
 #include "vmcis.h"
 #include <unistd.h>
 #include "testdirectory.h"
-
+#include "blocking.h"
+#include "minimizer.h"
 
 class MainApplication
 {
@@ -25,6 +26,10 @@ public:
 
     void runSimulation();
     void simulateWithOutput(int nParticles, double alpha, double beta);
+    void blockData();
+    void runSimulation(bool importancesampling, int nCycles, int nParticles, double alpha, double beta);
+    void minimizeBruteForce();
+    void minimizeNM();
 };
 
 #endif // MAINAPPLICATION_H
