@@ -121,9 +121,9 @@ void MainApplication::runSimulation(){
 //    double beta=0.36;
 
     //Beryllium
-    int nParticles=10;
-    double alpha=10;
-    double beta=0.2;
+    int nParticles=4;
+    double alpha=3.54406;
+    double beta=0.476959;
 
     //Neon
 //    int nParticles=10;
@@ -132,7 +132,7 @@ void MainApplication::runSimulation(){
 
     VMCIS vmc=VMCIS(this->myrank, this->numprocs, nParticles, alpha, beta);
     vmc.setCycles(nCycles);
-    vmc.runMonteCarloIntegration();
+    cout << vmc.runMonteCarloIntegration()<<endl;
 }
 
 

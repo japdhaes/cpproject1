@@ -101,9 +101,9 @@ double VMCSolver::runMonteCarloIntegration()
     double acceptratio=double(totalaccepted)/(totalrejected+totalaccepted);
 
     double energySquared = energySquaredSum/(local_nCycles);
-    cout << "Energy: " << totalenergy/numprocs << " Energy (squared sum): " << energySquared << endl;
-    cout << "Variance: "<< energySquared-pow(totalenergy/numprocs,2)<<endl;
-    cout << "Total acceptratio: " <<acceptratio << endl;
+//    cout << "Energy: " << totalenergy/numprocs << " Energy (squared sum): " << energySquared << endl;
+//    cout << "Variance: "<< energySquared-pow(totalenergy/numprocs,2)<<endl;
+//    cout << "Total acceptratio: " <<acceptratio << endl;
     return totalenergy/numprocs;
 }
 
@@ -141,7 +141,6 @@ void VMCSolver::solverInitializer(){
 }
 
 void VMCSolver::thermalize(){
-    cout << "thermalizing "<<endl;
     for(int cycle = 0; cycle < thermalizingSteps; cycle++) {
 
 //        if(cycle%(thermalizingSteps/50)==0)

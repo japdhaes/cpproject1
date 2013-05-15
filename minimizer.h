@@ -37,6 +37,9 @@ protected:
     double energyExpansionPoint;
     double energyContractionPoint;
 
+    double totaldifference;
+    double difference;
+
     mat points;
     VMCIS vmcsolver;
 };

@@ -40,12 +40,13 @@ void Minimizer::bruteForce(int nParticles, double alphamin, double alphamax, dou
 }
 
 void Minimizer::nelderMeadMethod(){
+    double tolerance=1e-3;
     //points for the method, we start with a square + an initial good guess.
     //first column = alpha, second column = beta, third column is energy
     int nParticles=4;
     points.zeros(5,3);
 //    VMCIS vmcsolver(myrank, numprocs, nParticles, 0, 0);
-    vmcsolver.setCycles(1e5);
+    vmcsolver.setCycles(1e6);
     double alpha, beta;
     //implemented for neon
     //point leftdown in square
@@ -81,10 +82,17 @@ void Minimizer::nelderMeadMethod(){
 
     //starting NM algorithm
     bool stop=false;
+    double averageEnergy=0.0;
+    double previousEnergy=0.0;
+    double previousAverageAlpha=0.0;
+    double previousAverageBeta=0.0;
+    double currentAverageAlpha=0.0;
+    double currentAverageBeta=0.0;
     while(!stop){
 
         //step 1 - order points
         orderPoints();
+        if(myrank==0)
         cout << "POINTS "<<points;
         //step 2 - calculate center of gravity of all points except largest energy
         calculateCenterOfGravity();
@@ -92,6 +100,29 @@ void Minimizer::nelderMeadMethod(){
         calculateReflectedPoint();
         //step 4 - decide case dependent on the energy of the reflected point
         decideCase();
+
+        //deciding to stop the algorithm
+        averageEnergy=0.0;
+        for(int i=0; i<points.n_rows;i++){
+            currentAverageAlpha+=points(i,0);
+            currentAverageBeta+=points(i,1);
+        }
+        currentAverageAlpha/=points.n_rows;
+        currentAverageBeta/=points.n_rows;
+
+        difference=sqrt(pow((currentAverageAlpha-previousAverageAlpha),2)+pow((currentAverageBeta-previousAverageBeta),2));
+        totaldifference=0.0;
+        MPI_Allreduce(&difference, &totaldifference, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        totaldifference/=numprocs;
+        cout << "myrank "<<myrank<<" difference "<< difference<< " total difference " <<totaldifference <<endl;
+
+        if(totaldifference<tolerance){
+            stop=true;
+        }
+
+        cout << "myrank "<< myrank << " stop "<< stop << " totaldifference "<< totaldifference<<endl;
+        previousAverageAlpha=currentAverageAlpha;
+        previousAverageBeta=currentAverageBeta;
     }
 
 }
@@ -124,7 +155,6 @@ void Minimizer::calculateCenterOfGravity(){
     }
     gravityalpha/=(points.n_rows-1);
     gravitybeta/=(points.n_rows-1);
-    cout << "gravityalpha "<<gravityalpha<< " gravitybeta "<<gravitybeta<<endl;
 }
 
 void Minimizer::calculateReflectedPoint(){
@@ -135,7 +165,6 @@ void Minimizer::calculateReflectedPoint(){
     }
     vmcsolver.setAlphaBeta(reflectedalpha,reflectedbeta);
     energyReflectedPoint=vmcsolver.runMonteCarloIntegration();
-    cout << "reflectedalpha "<<reflectedalpha<<" beta "<<reflectedbeta<<" energy "<<energyReflectedPoint<<endl;
 }
 
 void Minimizer::decideCase(){
@@ -153,15 +182,12 @@ void Minimizer::decideCase(){
     }
 
     if(i==0){
-        cout << "case expansion"<<endl;
         expansion();
     }
     else if(i<points.n_rows){
-        cout << "case accept reflection"<<endl;
         acceptReflection();
     }
     else{
-        cout << "case contraction"<<endl;
         contraction();
     }
 }
@@ -174,22 +200,17 @@ void Minimizer::expansion(){
     }
     vmcsolver.setAlphaBeta(expansionalpha,expansionbeta);
     energyExpansionPoint=vmcsolver.runMonteCarloIntegration();
-    cout << "expansionalpha= "<<expansionalpha<< " beta "<< expansionbeta << " energy "<<energyExpansionPoint<<endl;
     if(energyExpansionPoint<energyReflectedPoint){
-        cout << "accepting expansionpoint"<<endl;
         points(points.n_rows-1,0)=expansionalpha;
         points(points.n_rows-1,1)=expansionbeta;
         points(points.n_rows-1,2)=energyExpansionPoint;
     }
     else{
-        cout << "rejecting expansion point "<<endl;
         acceptReflection();
     }
 }
 
 void Minimizer::acceptReflection(){
-    cout << "accepting reflection point "<<endl;
-    cout << "reflectedalpha= "<<reflectedalpha<< " beta "<< reflectedbeta << " energy "<<energyReflectedPoint<<endl;
     points(points.n_rows-1,0)=reflectedalpha;
     points(points.n_rows-1,1)=reflectedbeta;
     vmcsolver.setAlphaBeta(points(points.n_rows-1,0),points(points.n_rows-1,1));
@@ -207,8 +228,6 @@ void Minimizer::contraction(){
 
     //accepting contraction point
     if(energyContractionPoint<points(points.n_rows-1,2)){
-        cout << "accepting contraction point "<<endl;
-        cout << "contractionalpha= "<<contractionalpha<< " beta "<< contractionbeta << " energy "<<energyContractionPoint<<endl;
         points(points.n_rows-1,0)=contractionalpha;
         points(points.n_rows-1,1)=contractionbeta;
         points(points.n_rows-1,2)=energyContractionPoint;
@@ -219,7 +238,6 @@ void Minimizer::contraction(){
 }
 
 void Minimizer::reduction(){
-    cout << "reducting all points "<<endl;
     for(int i=1; i<points.n_rows;i++){
         points(i,0)=points(0,0)+sigmaNM*(points(i,0)-points(0,0));
         points(i,1)=points(0,1)+sigmaNM*(points(i,1)-points(0,1));
@@ -227,6 +245,8 @@ void Minimizer::reduction(){
             points(i,1)=0.0;
         }
         vmcsolver.setAlphaBeta(points(i,0),points(i,1));
-        points(i,2)=vmcsolver.runMonteCarloIntegration();
+        double reductedEnergy=vmcsolver.runMonteCarloIntegration();
+        if(myrank==0)
+        points(i,2)=reductedEnergy;
     }
 }

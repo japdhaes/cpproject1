@@ -10,7 +10,7 @@
 
 const double pi=3.1415926535;
 const int nrOfCyclesEachOutput=1e6;
-const int thermalizingSteps=1e4;
+const int thermalizingSteps=1e5;
 
 using namespace arma;
 
