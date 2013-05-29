@@ -14,22 +14,21 @@ void VMCIS::cycle(const int &i){
     }
     this->wf.setNewPos(rNew);
 
-    // Recalculate the value of the wave function
-    waveFunctionNew = wf.evaluate(rNew);
+    // Calculate new quantum force
     qForceNew=this->quantumForce();
 
     // Check for step acceptance (if yes, update position, if no, reset position)
-    double expratio = 0.0;
+    double greensratio = 0.0;
     for(int k=0; k<nParticles;k++){
         for(int j=0;j<nDimensions;j++){
-            expratio+=(qForceOld(k,j)+qForceNew(k,j))*(D*h*(qForceOld(k,j)-qForceNew(k,j))+2.0*(rOld(k,j)-rNew(k,j)));
+            greensratio+=(qForceOld(k,j)+qForceNew(k,j))*(D*h*(qForceOld(k,j)-qForceNew(k,j))+2.0*(rOld(k,j)-rNew(k,j)));
         }
     }
-    expratio/=4.0;
-    expratio=exp(expratio);
+    greensratio/=4.0;
+    greensratio=exp(greensratio);
 
     //accepting
-    if(ran2(&idum) <= expratio*wf.calcRatio()) {
+    if(ran2(&idum) <= greensratio*wf.calcRatio()) {
         wf.acceptMove();
         rOld.row(i)=rNew.row(i);
         qForceOld=qForceNew;
@@ -55,6 +54,5 @@ void VMCIS::initialize()
     solverInitializer();
     rNew = rOld;
     wf.initialize(rOld);
-    waveFunctionOld = wf.evaluate(rOld);
     qForceNew = qForceOld = quantumForce() ;
 }

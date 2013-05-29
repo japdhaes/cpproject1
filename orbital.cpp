@@ -1,17 +1,17 @@
 #include "orbital.h"
 
-Orbital::Orbital(double _alpha)
+Hydrogenic::Hydrogenic(double _alpha)
 {
     this->alpha=_alpha;
     this->nDimensions=3;
 }
 
-void Orbital::setAlpha(const double &newAlpha)
+void Hydrogenic::setAlpha(const double &newAlpha)
 {
     alpha = newAlpha;
 }
 
-double Orbital::hydrogenWF(const vec &rvec, const int &qNum)
+double Hydrogenic::wavefunction(const rowvec &rvec, const int &qNum)
 {
     switch (qNum)
     {
@@ -39,7 +39,7 @@ double Orbital::hydrogenWF(const vec &rvec, const int &qNum)
     return wfCurrent;
 }
 
-vec3 Orbital::gradient(const vec &rvec, const int &qNum)
+rowvec Hydrogenic::gradient(const rowvec &rvec, const int &qNum)
 {
     switch (qNum)
     {
@@ -66,7 +66,7 @@ vec3 Orbital::gradient(const vec &rvec, const int &qNum)
     return grad;
 }
 
-double Orbital::laplacian(const vec &rvec, const int &qNum)
+double Hydrogenic::laplacian(const rowvec &rvec, const int &qNum)
 {
     switch (qNum)
     {
@@ -93,7 +93,7 @@ double Orbital::laplacian(const vec &rvec, const int &qNum)
     return lapl;
 }
 
-double Orbital::phi1s(const vec &rvec)
+double Hydrogenic::phi1s(const vec &rvec)
 {
     r = 0;
     for (int i = 0; i < nDimensions; i++)
@@ -103,12 +103,12 @@ double Orbital::phi1s(const vec &rvec)
     return exp(-alpha*r);
 }
 
-double Orbital::phi1s(const double &rr)
+double Hydrogenic::phi1s(const double &rr)
 {
     return exp(-alpha*rr);
 }
 
-double Orbital::phi2s(const vec &rvec)
+double Hydrogenic::phi2s(const vec &rvec)
 {
     r = 0;
     for (int i = 0; i < nDimensions; i++)
@@ -119,13 +119,13 @@ double Orbital::phi2s(const vec &rvec)
     return (1.0 - arg)*exp(-arg);
 }
 
-double Orbital::phi2s(const double &r)
+double Hydrogenic::phi2s(const double &r)
 {
     double arg = alpha*r*0.5;
     return (1.0 - arg)*exp(-arg);
 }
 
-double Orbital::phi2p(const vec &rvec, const int &k)
+double Hydrogenic::phi2p(const vec &rvec, const int &k)
 {
     r = 0.0;
     for (int i = 0; i<nDimensions; i++){
@@ -136,7 +136,7 @@ double Orbital::phi2p(const vec &rvec, const int &k)
     return rvec(k)*exp(-0.5*alpha*r);
 }
 
-vec3 Orbital::dphi1s(const vec3 &rvec)
+vec3 Hydrogenic::dphi1s(const vec3 &rvec)
 {
     vec3 dphi;
     r = 0.0;
@@ -149,7 +149,7 @@ vec3 Orbital::dphi1s(const vec3 &rvec)
     return dphi;
 }
 
-vec3 Orbital::dphi2s(const vec3 &rvec)
+vec3 Hydrogenic::dphi2s(const vec3 &rvec)
 {
     r = 0.0;
     for(int i = 0; i < nDimensions; i++){
@@ -160,7 +160,7 @@ vec3 Orbital::dphi2s(const vec3 &rvec)
     return alpha*rvec*(alpha*r - 4.0)*exp(-alpha*r/2.0)/(4.0*r);
 }
 
-vec3 Orbital::dphi2p(const vec3 &rvec, const int &k)
+vec3 Hydrogenic::dphi2p(const vec3 &rvec, const int &k)
 {
     vec3 dphi;
     double r2 = 0.0;
@@ -178,7 +178,7 @@ vec3 Orbital::dphi2p(const vec3 &rvec, const int &k)
     return dphi;
 }
 
-double Orbital::ddphi1s(const vec &rvec)
+double Hydrogenic::ddphi1s(const vec &rvec)
 {
     r = 0.0;
     for(int i = 0; i < nDimensions; i++){
@@ -188,7 +188,7 @@ double Orbital::ddphi1s(const vec &rvec)
     return alpha*(alpha*r - 2.0)*exp(-alpha*r)/r;
 }
 
-double Orbital::ddphi2s(const vec &rvec)
+double Hydrogenic::ddphi2s(const vec &rvec)
 {
     double r2 = 0.0;
     for(int i = 0; i < nDimensions; i++){
@@ -199,7 +199,7 @@ double Orbital::ddphi2s(const vec &rvec)
     return -alpha*(alpha*alpha*r2 - 10*alpha*r + 16)*exp(-alpha*r/2)/(8*r);
 }
 
-double Orbital::ddphi2p(const vec &rvec, const int &k)
+double Hydrogenic::ddphi2p(const vec &rvec, const int &k)
 {
     r = 0.0;
     for(int i = 0; i < nDimensions; i++){
@@ -210,7 +210,7 @@ double Orbital::ddphi2p(const vec &rvec, const int &k)
     return alpha*rvec(k)*(alpha*r - 8.0)*exp(-alpha*r/2.0)/(4.0*r);
 }
 
-double Orbital::alphaGradient(const rowvec &rvec, const int &qNum)
+double Hydrogenic::alphaGradient(const rowvec &rvec, const int &qNum)
 {
     double r = 0.0;
     for (int i = 0; i < nDimensions; i++)
@@ -233,5 +233,9 @@ double Orbital::alphaGradient(const rowvec &rvec, const int &qNum)
         cout << "Please implement more hydrogen wavefunctions" << endl;
         exit(1);
     }
+}
+
+void Hydrogenic::setR(const double &dist)
+{
 }
 

@@ -1067,38 +1067,38 @@ exit(1);
 
 double rtsec(double (*func)(double), double x1, double x2, double xacc)
 {
-int j;
-double fl, f, dx, swap, xl, rts;
+    int j;
+    double fl, f, dx, swap, xl, rts;
 
-fl = (*func)(x1);
-f  = (*func)(x2);
-if(fabs(fl) < fabs(f)) {
-  rts  = x1;
-  xl   = x2;
-  swap = fl;
-  fl   = f;
-  f    = swap;
-}
-else {
-  xl  = x1;
-  rts = x2;
-}
-for(j = 0; j < MAXIT; j++) {
-  dx   = (xl - rts) * f/(f - fl);
-  xl   = rts;
-  fl   = f;
-  rts += dx;
-  f    = (*func)(rts);
-  if(fabs(dx) < xacc || f == 0.0) return rts;
-}
-printf("\n\nError in function rtsec():");      // should never reach this point
-printf("\nToo many iterations!!!\n");
-exit(1);
+    fl = (*func)(x1);
+    f  = (*func)(x2);
+    if(fabs(fl) < fabs(f)) {
+        rts  = x1;
+        xl   = x2;
+        swap = fl;
+        fl   = f;
+        f    = swap;
+    }
+    else {
+        xl  = x1;
+        rts = x2;
+    }
+    for(j = 0; j < MAXIT; j++) {
+        dx   = (xl - rts) * f/(f - fl);
+        xl   = rts;
+        fl   = f;
+        rts += dx;
+        f    = (*func)(rts);
+        if(fabs(dx) < xacc || f == 0.0) return rts;
+    }
+    printf("\n\nError in function rtsec():");      // should never reach this point
+    printf("\nToo many iterations!!!\n");
+    exit(1);
 }
 #undef MAXIT
 // End: function rtsec()
 
-  /*
+/*
   ** The function
   **       rtnewt()
   ** calculates a root between x1 and x2 of a function pointed to
@@ -1111,26 +1111,26 @@ exit(1);
 #define MAXIT 20                       // max iterations
 
 double rtnewt(void (*funcd)(double, double *, double *), double x1, double x2,
-double xacc)
+              double xacc)
 {
-int     j;
-double  df, dx, f, rtn;
+    int     j;
+    double  df, dx, f, rtn;
 
-rtn = 0.5 * (x1 + x2);                // initial guess
-for(j = 0; j < MAXIT; j++) {
-  (*funcd)(rtn, &f, &df);
-  dx   = f/df;
-  rtn -= dx;
-  if((x1 - rtn) * (rtn - x2) < 0.0)  {
-     printf("\n\nError in function rtnewt():");
-     printf("\nJump out of interval bracket\n");
-     exit(1);
-  }
-  if (fabs(dx) < xacc) return rtn;
-}
-printf("\n\nError in function rtnewt():");      // should never reach this point
-printf("\nToo many iterations!!!\n");
-exit(1);
+    rtn = 0.5 * (x1 + x2);                // initial guess
+    for(j = 0; j < MAXIT; j++) {
+        (*funcd)(rtn, &f, &df);
+        dx   = f/df;
+        rtn -= dx;
+        if((x1 - rtn) * (rtn - x2) < 0.0)  {
+            printf("\n\nError in function rtnewt():");
+            printf("\nJump out of interval bracket\n");
+            exit(1);
+        }
+        if (fabs(dx) < xacc) return rtn;
+    }
+    printf("\n\nError in function rtnewt():");      // should never reach this point
+    printf("\nToo many iterations!!!\n");
+    exit(1);
 }
 #undef MAXIT
 // End: function rtnewt()

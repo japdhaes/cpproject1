@@ -9,19 +9,24 @@ MainApplication::MainApplication(int _myrank, int _numprocs):
 using namespace std;
 
 void MainApplication::runApplication(){
-//    runSimulation();
+    //runSimulation();
     //simulateWithOutput(10, 9.95, 0.18);
-    //minimizeBruteForce();
-    minimizeNM();
+//    minimizeBruteForce();
+//    minimizeNM();
+    //rtsec(double (*func)(double), double x1, double x2, double xacc)
+
+    cout << "out of minimizer "<<endl;
 }
+
+
 
 void MainApplication::minimizeBruteForce(){
     Minimizer minimizer(myrank,numprocs, 2);
-    minimizer.bruteForce(2, 0, 2, 0, 1);
+    minimizer.bruteForce(10, 9, 11, 0, 1);
 }
 
 void MainApplication::minimizeNM(){
-    Minimizer minimizer(myrank, numprocs, 4);
+    Minimizer minimizer(myrank, numprocs, 2);
     minimizer.nelderMeadMethod();
 }
 
@@ -113,7 +118,7 @@ void MainApplication::runSimulation(bool importancesampling, int nCycles, int nP
 }
 
 void MainApplication::runSimulation(){
-    int nCycles=1e5;
+    int nCycles=1e6;
     bool importancesampling=true;
     //Helium
 //    int nParticles=2;
@@ -121,14 +126,14 @@ void MainApplication::runSimulation(){
 //    double beta=0.36;
 
     //Beryllium
-    int nParticles=4;
-    double alpha=3.54406;
-    double beta=0.476959;
+//    int nParticles=4;
+//    double alpha=3.54406;
+//    double beta=0.476959;
 
     //Neon
-//    int nParticles=10;
-//    double alpha=10.6;
-//    double beta=0.1;
+    int nParticles=10;
+    double alpha=9.8;
+    double beta=0.4;
 
     VMCIS vmc=VMCIS(this->myrank, this->numprocs, nParticles, alpha, beta);
     vmc.setCycles(nCycles);

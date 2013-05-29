@@ -1,6 +1,7 @@
 #ifndef SLATER_H
 #define SLATER_H
-#include "orbital.h"
+#include "orbitals.h"
+#include "dimoleculeorbitals.h"
 #include <armadillo>
 using namespace std;
 using namespace arma;
@@ -10,7 +11,7 @@ class Slater
 public:
     Slater();
 //    Slater(int myrank, int numprocs, double _alpha, double _beta);
-    Slater(double _alpha, int _nParticles);
+    Slater(double _alpha, int _nParticles, int orbitaltype);
     void setAlpha(const double _alpha);
     void setCurrentParticle(const int &i);
     void setNewPosition(const mat &r);
@@ -36,6 +37,7 @@ public:
     double localLaplacian2(const int &i);
     mat gradient(const mat &r, const double &h);
     double alphaGradient(const int &i);
+    void setR(const double &dist);
 protected:
     int nDimensions;
     int nParticles;
@@ -51,7 +53,7 @@ protected:
     mat sdupinverse, sddowninverse;
     mat sdupnew, sddownnew;
     mat sdupinversenew, sddowninversenew;
-    Orbital orbs;
+    Orbitals *orbs;
 
     double alpha;
     double R;

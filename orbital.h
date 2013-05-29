@@ -1,20 +1,23 @@
 #ifndef Orbital_H
 #define Orbital_H
-
+#include "orbitals.h"
 #include <armadillo>
 
 using namespace std;
 using namespace arma;
 
-class Orbital
+class Hydrogenic :public Orbitals
 {
 public:
-    Orbital(){};
-    Orbital(double _alpha);
+    Hydrogenic(){};
+    Hydrogenic(double _alpha);
     void setAlpha(const double &newAlpha);
-    double hydrogenWF(const vec &rvec, const int &qNum);
-    vec3 gradient(const vec &rvec, const int &qNum);
-    double laplacian(const vec &rvec, const int &qNum);
+    virtual double wavefunction(const rowvec &rvec, const int &qNum) ;
+    virtual rowvec gradient(const rowvec &rvec, const int &qNum);
+    virtual double laplacian(const rowvec &rvec, const int &qNum) ;
+    virtual double alphaGradient(const rowvec &rvec, const int &qNum);
+    virtual void setR(const double &dist);
+protected:
     double phi1s(const vec &rvec);
     double phi1s(const double &r);
     double phi2s(const vec &rvec);
@@ -26,14 +29,7 @@ public:
     double ddphi2s(const vec &rvec);
     double ddphi2p(const vec &rvec, const int &k);
     double phi2s(const double &r);
-    double alphaGradient(const rowvec &rvec, const int &qNum);
-private:
-    int nDimensions;
-    double wfCurrent;
-    double alpha;
-    double r, arg;
-    vec3 grad;
-    double lapl;
+
 };
 
 #endif // Orbital_H

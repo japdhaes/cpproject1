@@ -33,9 +33,6 @@ double VMCSolver::runMonteCarloIntegration()
     rOld = zeros<mat>(nParticles, nDimensions);
     rNew = zeros<mat>(nParticles, nDimensions);
 
-    waveFunctionOld = 0;
-    waveFunctionNew = 0;
-
     double energySum = 0;
     double energySquaredSum = 0;
 
@@ -55,7 +52,6 @@ double VMCSolver::runMonteCarloIntegration()
     double r12 = 0;
 
     thermalize();
-
     for(int cycle = my_start; cycle < my_end; cycle++) {
 
 //        if(cycle%(my_end/100)==0)
@@ -63,9 +59,6 @@ double VMCSolver::runMonteCarloIntegration()
         if(cycle%nrOfCyclesEachOutput==0 && createOutput && cycle >0){
             datalogger.flushData();
         }
-
-        // Store the current value of the wave function
-        waveFunctionOld = wf.evaluate(rOld);
 
         // New position to test
         for(int i = 0; i < nParticles; i++) {
@@ -88,7 +81,9 @@ double VMCSolver::runMonteCarloIntegration()
 
 
     double energy = energySum/(local_nCycles);
+    double energySquared = energySquaredSum/(local_nCycles);
     double totalenergy=0;
+    double totalenergySquared=0;
     int totalaccepted=0, totalrejected=0;
 
     //1 processor receives all information
@@ -96,15 +91,19 @@ double VMCSolver::runMonteCarloIntegration()
 
     //all processors receive all information
     MPI_Allreduce(&energy, &totalenergy, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    totalenergy/=numprocs;
     MPI_Allreduce(&nAccepted, &totalaccepted, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(&nRejected, &totalrejected, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&energySquared, &totalenergySquared, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    totalenergySquared/=numprocs;
     double acceptratio=double(totalaccepted)/(totalrejected+totalaccepted);
 
-    double energySquared = energySquaredSum/(local_nCycles);
+    double variance = totalenergySquared-pow(totalenergy,2);
+
 //    cout << "Energy: " << totalenergy/numprocs << " Energy (squared sum): " << energySquared << endl;
 //    cout << "Variance: "<< energySquared-pow(totalenergy/numprocs,2)<<endl;
 //    cout << "Total acceptratio: " <<acceptratio << endl;
-    return totalenergy/numprocs;
+    return totalenergy;
 }
 
 
@@ -145,9 +144,6 @@ void VMCSolver::thermalize(){
 
 //        if(cycle%(thermalizingSteps/50)==0)
 //            cout << "Currently thermalizing in cycle "<< cycle<<endl;
-
-        // Store the current value of the wave function
-        waveFunctionOld = wf.evaluate(rOld);
 
         // New position to test
         for(int i = 0; i < nParticles; i++) {

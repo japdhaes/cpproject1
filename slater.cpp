@@ -1,11 +1,16 @@
 #include "slater.h"
 
-Slater::Slater(double _alpha, int _nParticles){
+Slater::Slater(double _alpha, int _nParticles, int orbitaltype){
     this->alpha=_alpha;
     this->nDimensions=3;
     this->nParticles=_nParticles;
     this->hp=_nParticles/2;
-    this->orbs=Orbital(this->alpha);
+    if(orbitaltype==0){
+        *(this->orbs)=Hydrogenic(this->alpha);
+    }
+    else if(orbitaltype==1){
+        *(this->orbs)=DimoleculeOrbitals(_alpha, 0);
+    }
     this->rOld = zeros<mat>(nParticles, nDimensions);
     this->rNew = zeros<mat>(nParticles, nDimensions);
     this->sdup = zeros<mat>(hp, hp);
@@ -20,6 +25,11 @@ Slater::Slater(double _alpha, int _nParticles){
     this->S=zeros(1,this->hp);
 }
 
+void Slater::setR(const double &dist)
+{
+    orbs->setR(dist);
+}
+
 //debugged
 void Slater::initialize(const mat &r){
     rNew = rOld = r;
@@ -30,9 +40,9 @@ void Slater::initialize(const mat &r){
     for(int particle=0; particle<this->hp; particle++){
         for(int orbital=0; orbital<this->hp;orbital++){
             temp = rNew.row(particle);
-            this->sdup(particle,orbital)=orbs.hydrogenWF(temp, orbital);
+            this->sdup(particle,orbital)=orbs->wavefunction(temp, orbital);
             temp = rNew.row(particle+this->hp);
-            this->sddown(particle,orbital)=orbs.hydrogenWF(temp, orbital);
+            this->sddown(particle,orbital)=orbs->wavefunction(temp, orbital);
         }
     }
     this->sdupinverse=inv(sdup);
@@ -57,9 +67,9 @@ double Slater::evaluate(const mat &r){
     for(int i=0; i<hp; i++){
         for(int j=0; j<hp;j++){
             temp = r.row(j);
-            sduptemp(i,j)=orbs.hydrogenWF(temp, i);
+            sduptemp(i,j)=orbs->wavefunction(temp, i);
             temp = r.row(j+hp);
-            sddowntemp(i,j)=orbs.hydrogenWF(temp, i);
+            sddowntemp(i,j)=orbs->wavefunction(temp, i);
         }
     }
     return det(sduptemp)*det(sddowntemp);
@@ -113,7 +123,7 @@ void Slater::acceptMove(){
 void Slater::setAlpha(const double _alpha)
 {
     this->alpha=_alpha;
-    this->orbs.setAlpha(_alpha);
+    this->orbs->setAlpha(_alpha);
 }
 
 //debugged
@@ -144,7 +154,7 @@ void Slater::setSlaterNew(){
         int i = this->cp;
         for(int j=0; j<this->hp;j++){
             rowvec temp = rNew.row(i);
-            this->sdupnew(i,j) = orbs.hydrogenWF(temp,j);
+            this->sdupnew(i,j) = orbs->wavefunction(temp,j);
         }
     }
     //spin DOWN
@@ -152,7 +162,7 @@ void Slater::setSlaterNew(){
         int i = this->cp-this->hp;
         for(int j=0; j<this->hp;j++){
             rowvec temp = rNew.row(this->cp);
-            this->sddownnew(i,j) = orbs.hydrogenWF(temp,j);
+            this->sddownnew(i,j) = orbs->wavefunction(temp,j);
         }
     }
 }
@@ -243,12 +253,12 @@ rowvec Slater::localGradient(const int &i){
     if(spinup){
         for(int j=0; j<this->hp; j++){
             //      gradient_i phi_j(r_i) *           d_ji^-1 (rNEW)
-            answer+=orbs.gradient(temp,j)*this->sdupinversenew(j,i);
+            answer+=orbs->gradient(temp,j)*this->sdupinversenew(j,i);
         }
     }
     else{
         for(int j=0; j<this->hp; j++){
-            answer+=orbs.gradient(temp,j)*this->sddowninversenew(j,i-this->hp);
+            answer+=orbs->gradient(temp,j)*this->sddowninversenew(j,i-this->hp);
         }
     }
     return answer;
@@ -261,12 +271,12 @@ double Slater::localLaplacian(const int &i){
     rowvec temp=this->rNew.row(i);
     if(spinup){
         for(int j=0; j<this->hp; j++){
-            answer+=orbs.laplacian(temp,j)*this->sdupinversenew(j,i);
+            answer+=orbs->laplacian(temp,j)*this->sdupinversenew(j,i);
         }
     }
     else{
         for(int j=0; j<this->hp; j++){
-            answer+=orbs.laplacian(temp,j)*this->sddowninversenew(j,i-this->hp);
+            answer+=orbs->laplacian(temp,j)*this->sddowninversenew(j,i-this->hp);
         }
     }
     return answer;
@@ -301,12 +311,12 @@ double Slater::alphaGradient(const int &i)
     double delta = 0.0;
     if (i < this->hp){
         for (int j = 0; j < this->hp; j++){
-            delta += orbs.alphaGradient(rNew.row(i),j)*this->sdupinversenew(j,i);
+            delta += orbs->alphaGradient(rNew.row(i),j)*this->sdupinversenew(j,i);
         }
     }
     else{
         for (int j = 0; j < this->hp; j++){
-            delta += orbs.alphaGradient(rNew.row(i),j)*this->sddowninversenew(j,i-this->hp);
+            delta += orbs->alphaGradient(rNew.row(i),j)*this->sddowninversenew(j,i-this->hp);
         }
     }
 

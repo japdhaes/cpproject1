@@ -16,7 +16,10 @@ SOURCES += main.cpp \
     testdirectory.cpp \
     datalogger.cpp \
     blocking.cpp \
-    minimizer.cpp
+    minimizer.cpp \
+    dimoleculewavefunction.cpp \
+    dimoleculeorbitals.cpp \
+    orbitals.cpp
 
 HEADERS += \
     vmcsolver.h \
@@ -31,7 +34,10 @@ HEADERS += \
     testdirectory.h \
     datalogger.h \
     blocking.h \
-    minimizer.h
+    minimizer.h \
+    dimoleculewavefunction.h \
+    dimoleculeorbitals.h \
+    orbitals.h
 
 LIBS+= -larmadillo
 

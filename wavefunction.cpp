@@ -1,7 +1,7 @@
 #include "wavefunction.h"
 
 Wavefunction::Wavefunction(int _nParticles, double _alpha, double _beta):
-    slater(_alpha, _nParticles),
+    slater(_alpha, _nParticles, 0),
     jastrow(_beta, _nParticles),
     charge(_nParticles),
     nParticles(_nParticles),
