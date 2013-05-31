@@ -21,17 +21,33 @@ Jastrow::Jastrow(double _beta, int _nParticles):
 
 void Jastrow::setBeta(double _beta)
 {
+    if(_beta<0.0){
+        cout << "Initializing Jastrow with a negative beta value. Exiting. "<<endl;
+        exit(1);
+    }
     this->beta=_beta;
 }
 
 void Jastrow::initialize_a(){
     for(int i=0; i<this->nParticles;i++){
         for(int j=0; j<this->nParticles;j++){
-            if((i+j)%2){
-                a(i,j)=0.5;
+            if(i==j){
+                a(i,j)=NAN;
+            }
+            else if(i < nParticles/2 && j < nParticles/2 ){
+                a(i,j)=0.25;
+            }
+            else if(i < nParticles/2 && j >= nParticles/2){
+                a(i,j)=0.50;
+            }
+            else if(i >= nParticles/2 && j >= nParticles/2){
+                a(i,j)=0.25;
+            }
+            else if(i >= nParticles/2 && j < nParticles/2){
+                a(i,j)=0.50;
             }
             else{
-                a(i,j)=0.25;
+                a(i,j)=NAN;
             }
         }
     }
@@ -267,12 +283,14 @@ rowvec Jastrow::localGradient(const int &k){
     return answer;
 }
 
-double Jastrow::betaGradient(const int &k)
+double Jastrow::betaGradient()
 {
     double delta = 0.0;
     for(int i=0; i<this->nParticles;i++){
-        double rijtemp = rijNew(i,k);
-        delta -=a(i,k)*rijtemp*rijtemp/((beta*rijtemp + 1.0)*(beta*rijtemp + 1.0));
+        for(int k=i+1; k<nParticles;k++){
+            double rijtemp = rijNew(i,k);
+            delta -=a(i,k)*rijtemp*rijtemp/((beta*rijtemp + 1.0)*(beta*rijtemp + 1.0));
+        }
     }
     return delta;
 }

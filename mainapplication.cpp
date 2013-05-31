@@ -2,37 +2,77 @@
 
 MainApplication::MainApplication(int _myrank, int _numprocs):
     myrank(_myrank),
-    numprocs(_numprocs)
+    numprocs(_numprocs),
+    alphaHe(1.819),
+    betaHe(0.352),
+    alphaBe(3.980),
+    betaBe(0.087),
+    alphaNe(10.24366653711),
+    betaNe(0.09522905708),
+    alphaH2(1.382),
+    betaH2(0.208),
+    distH2(1.263)
 {
 }
 
 using namespace std;
 
 void MainApplication::runApplication(){
-    //runSimulation();
-    //simulateWithOutput(10, 9.95, 0.18);
-//    minimizeBruteForce();
-//    minimizeNM();
-    //rtsec(double (*func)(double), double x1, double x2, double xacc)
+    //==========================
+    //optimal He parameters
+    //energy
+    //alpha = 1.819
+    //beta = 0.352
+    //variance
+    //alpha = 1.957
+    //beta = 0.361
+    //==========================
+    //==========================
+    //optimal Be parameters
+    //energy
+    //alpha = 3.980
+    //beta = 0.087
+    //variance
+    //alpha = 3.953
+    //beta = 0.655
+    //==========================
+    //==========================
+    //optimal Ne parameters
+    //energy
+    //alpha = 10.24366653711
+    //beta = 0.09522905708
+    //variance
+    //alpha =10.030
+    //beta = 0.350
+    //==========================
+    //==========================
+    //optimal H2 parameters
+    //energy
+    //alpha = 1.382
+    //beta = 0.208
+    //dist = 1.263
+    //==========================
 
-    cout << "out of minimizer "<<endl;
+    runSimulation();
+    //simulateWithOutput(2, 1.38232847756, 0.20780543704);
+    //minimizeBruteForce();
+    //minimizeNM();
 }
 
 
 
 void MainApplication::minimizeBruteForce(){
-    Minimizer minimizer(myrank,numprocs, 2);
-    minimizer.bruteForce(10, 9, 11, 0, 1);
+    Minimizer minimizer(myrank,numprocs, 4);
+    double alphamin = 3.5;
+    double alphamax = 4.0;
+    double betamin = 0.0;
+    double betamax = 0.5;
+    minimizer.bruteForce(alphamin, alphamax, betamin, betamax);
 }
 
 void MainApplication::minimizeNM(){
-    Minimizer minimizer(myrank, numprocs, 2);
-    minimizer.nelderMeadMethod();
-}
-
-void MainApplication::blockData(){
-    Blocking blocking("/home/jonathan/projectsCP/project1/data/helium/");
-    blocking.doBlocking();
+    Minimizer minimizer(myrank, numprocs, 4);
+    minimizer.nelderMeadMethodDM();
 }
 
 void MainApplication::simulateWithOutput(int nParticles, double alpha, double beta){
@@ -62,7 +102,7 @@ void MainApplication::simulateWithOutput(int nParticles, double alpha, double be
     }
     //creating outputfolder for data
     if(nParticles == 2){
-        outputfolder << "helium/";
+        outputfolder << "dihydrogen/";
     }
     else if(nParticles == 4){
         outputfolder << "beryllium/";
@@ -98,6 +138,7 @@ void MainApplication::simulateWithOutput(int nParticles, double alpha, double be
 //    double beta=0.1;
 
     VMCIS vmc=VMCIS(this->myrank, this->numprocs, nParticles, alpha, beta);
+    vmc.setdist(1.26284067098);
     vmc.setCycles(1e6);
     vmc.setOutput(true);
     vmc.setOutputDirectory(outputfolder.str().c_str());
@@ -118,183 +159,36 @@ void MainApplication::runSimulation(bool importancesampling, int nCycles, int nP
 }
 
 void MainApplication::runSimulation(){
-    int nCycles=1e6;
+    int nCycles=1e5;
     bool importancesampling=true;
     //Helium
-//    int nParticles=2;
-//    double alpha=1.8;
-//    double beta=0.36;
+    int nParticles=4;
+    double alpha=1.8;
+    double beta=0.36;
 
     //Beryllium
-//    int nParticles=4;
+//    int nParticles=10;
 //    double alpha=3.54406;
+//    alpha=10.0;
 //    double beta=0.476959;
 
     //Neon
-    int nParticles=10;
-    double alpha=9.8;
-    double beta=0.4;
+//    int nParticles=10;
+//    double alpha=9.8;
+//    double beta=0.4;
 
     VMCIS vmc=VMCIS(this->myrank, this->numprocs, nParticles, alpha, beta);
     vmc.setCycles(nCycles);
     cout << vmc.runMonteCarloIntegration()<<endl;
 }
 
-
-//void MainApplication::runBeryllium(double alpha, double beta){
-////    double alpha =3.5;
-////    double beta=3.5;
-//    BeWF solver(myrank, numprocs, alpha, beta);
-//    solver.importanceSampling=true;
-//    solver.closedForm=false;
-//    cout << solver.runMonteCarloIntegration()<<endl;
-
+//===============================
+//FIND a solution for the fact that getAcceptanceRatio a "double (VMCBF::*)(double)" function is, while rtsec needs a
+//double (*)(double) function...
+//===============================
+//void MainApplication::steplengthSecant(){
+//    //double rtsec(double (*func)(double), double x1, double x2, double xacc)
+//    VMCBF vmcbf(myrank, numprocs, 2, alphaHe, betaHe);
+//    double steplength = rtsec(&vmcbf.getAcceptanceRatio,0,5,0.01);
 //}
 
-//void MainApplication::steplength_secant(){
-//    double delta;
-
-//    double steplength_pp=1, steplength_p=1.1;
-//    double fpp, fp=-1, f;
-
-//    double steplength=1;
-//    double alpha=1.8;
-//    double beta=0.36;
-
-//    int varsteps=100;
-//    double steplengthmin=1.4;
-//    double steplengthmax=1.6;
-//    double dr=(steplengthmax-steplengthmin)/varsteps;
-//    double energy;
-//    double tolerance=1e-4;
-
-//    HeWF solver(myrank, numprocs, alpha, beta);
-////    VMCSolver solver(alpha, beta);
-//    double olderdelta, olddelta;
-//    double oldersteplength=1.1, oldsteplength=1.1;
-
-////    solver.runMonteCarloIntegration(&energy, steplength_pp, fpp);
-//    fpp-=0.5;
-//    //solver.runMonteCarloIntegration(&energy, steplength, delta);
-
-//    //cout << abs(delta-0.5)/delta << endl;
-
-
-
-//    while(abs(fpp)>tolerance){
-
-////        solver.runMonteCarloIntegration(&energy, steplength_p, fp);
-//        fp-=0.5;
-
-//        steplength = steplength_p - fp * (steplength_p-steplength_pp)/(fp - fpp);
-//        steplength_pp = steplength_p;
-//        steplength_p = steplength;
-//        fpp=fp;
-//        cout << "steplength " << steplength << endl;
-//    }
-
-//}
-
-//void MainApplication::steplength_manually(){
-//    double steplength;
-//    double alpha=1.8;
-//    double beta=0.36;
-//    double delta;
-
-//    int varsteps=100;
-//    double steplengthmin=1.4;
-//    double steplengthmax=1.6;
-//    double dr=(steplengthmax-steplengthmin)/varsteps;
-
-
-//    double lowestenergy=0, energy;
-//    double lowestalpha=0, lowestbeta=0;
-
-//    HeWF solver(myrank, numprocs, alpha, beta);
-
-////    VMCSolver solver(alpha, beta);
-//    for(double nsteplength=0; nsteplength<varsteps; nsteplength++){
-//        steplength = steplengthmin + nsteplength*dr;
-//        if(solver.myrank==0) cout << "steplength   = " << steplength << endl;
-////        solver.runMonteCarloIntegration(&energy, steplength, delta );
-//    }
-//}
-
-//void MainApplication::alphabetavalues(){
-//    double lowestenergy=0, energy;
-//    double lowestalpha=0, lowestbeta=0;
-//    /*long seed=-1*time(0);
-//    cout << "test" << endl;
-//    cout << "Hello World!" << endl;
-//    for(int i=0; i<50; i++){
-//        cout << ran2(&seed) << endl;
-//    }*/
-
-
-//    /*for(double i=1.78; i<1.81; i+=0.005){
-//        for(double j=0.25; j<0.5; j+=0.01){
-
-//            VMCSolver test(1, 1);
-//            cout << "testing with alpha= " << i << " and beta= " <<j << endl;
-//            test.runMonteCarloIntegration(&energy);
-//            if(energy<lowestenergy){
-//                lowestenergy=energy;
-//                lowestalpha=i;
-//                lowestbeta=j;
-//            }
-//            //found lowest energy -2.89226 at values alpha = 1.85 and beta = 0.45
-//            //found lowest energy -2.89395 at values alpha = 1.8 and beta = 0.36
-
-//        //}
-//    }*/
-//    cout << "found lowest energy "<< lowestenergy << " at values alpha = " << lowestalpha << " and beta = " << lowestbeta << endl;
-
-//}
-
-//void MainApplication::calculateClosedForm(){
-//    double steplength=1.485;
-//    double energy;
-//    double delta;
-//    double alpha=1.8;
-//    double beta=0.36;
-
-//    HeWF solver(myrank, numprocs, alpha, beta);
-
-////    VMCSolver solver(alpha, beta);
-
-
-
-////    solver.runMonteCarloIntegrationClosedForm(&energy, steplength, delta);
-
-//    cout << energy << endl;
-////    solver.runMonteCarloIntegration(&energy, steplength, delta);
-////    cout << energy << endl;
-//    //solver.runMonteCarloIntegration(&energy, steplength, delta);
-
-//    //cout << abs(delta-0.5)/delta << endl;
-
-//}
-
-//void MainApplication::calculateCFImportanceSampling(){
-//    double steplength=1.485;
-//    double energy;
-//    double delta;
-//    double alpha=1.8;
-//    double beta=0.36;
-
-//    HeWF solver(myrank, numprocs, alpha, beta);
-
-////    VMCSolver solver(alpha, beta);
-
-
-
-////    solver.runMonteCarloIntegrationCFImportanceSampling(&energy, steplength, delta);
-
-//    cout << energy << endl;
-////    solver.runMonteCarloIntegration(&energy, steplength, delta);
-////    cout << energy << endl;
-//    //solver.runMonteCarloIntegration(&energy, steplength, delta);
-
-//    //cout << abs(delta-0.5)/delta << endl;
-
-//}

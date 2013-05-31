@@ -9,10 +9,10 @@ using namespace arma;
 class Hydrogenic :public Orbitals
 {
 public:
-    Hydrogenic(){};
+    Hydrogenic():Orbitals(0){};
     Hydrogenic(double _alpha);
-    void setAlpha(const double &newAlpha);
     virtual double wavefunction(const rowvec &rvec, const int &qNum) ;
+    virtual void setAlpha(const double &_alpha);
     virtual rowvec gradient(const rowvec &rvec, const int &qNum);
     virtual double laplacian(const rowvec &rvec, const int &qNum) ;
     virtual double alphaGradient(const rowvec &rvec, const int &qNum);

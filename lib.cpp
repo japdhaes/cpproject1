@@ -1065,13 +1065,13 @@ exit(1);
 
 #define MAXIT 30      // max iterations
 
-double rtsec(double (*func)(double), double x1, double x2, double xacc)
+double rtsec(double (*func)(double, double), double x1, double x2, double xacc, double R)
 {
     int j;
     double fl, f, dx, swap, xl, rts;
 
-    fl = (*func)(x1);
-    f  = (*func)(x2);
+    fl = (*func)(x1,R);
+    f  = (*func)(x2,R);
     if(fabs(fl) < fabs(f)) {
         rts  = x1;
         xl   = x2;
@@ -1088,7 +1088,7 @@ double rtsec(double (*func)(double), double x1, double x2, double xacc)
         xl   = rts;
         fl   = f;
         rts += dx;
-        f    = (*func)(rts);
+        f    = (*func)(rts,R);
         if(fabs(dx) < xacc || f == 0.0) return rts;
     }
     printf("\n\nError in function rtsec():");      // should never reach this point

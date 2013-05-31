@@ -9,17 +9,16 @@ SOURCES += main.cpp \
     mainapplication.cpp \
     slater.cpp \
     orbital.cpp \
-    wavefunction.cpp \
     jastrow.cpp \
     vmcis.cpp \
     vmcbf.cpp \
     testdirectory.cpp \
     datalogger.cpp \
-    blocking.cpp \
     minimizer.cpp \
     dimoleculewavefunction.cpp \
     dimoleculeorbitals.cpp \
-    orbitals.cpp
+    orbitals.cpp \
+    atomwavefunction.cpp
 
 HEADERS += \
     vmcsolver.h \
@@ -27,17 +26,16 @@ HEADERS += \
     mainapplication.h \
     slater.h \
     orbital.h \
-    wavefunction.h \
     jastrow.h \
     vmcis.h \
     vmcbf.h \
     testdirectory.h \
     datalogger.h \
-    blocking.h \
     minimizer.h \
     dimoleculewavefunction.h \
     dimoleculeorbitals.h \
-    orbitals.h
+    orbitals.h \
+    atomwavefunction.h
 
 LIBS+= -larmadillo
 

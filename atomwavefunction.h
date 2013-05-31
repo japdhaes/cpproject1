@@ -1,6 +1,5 @@
-#ifndef WAVEFUNCTION_H
-#define WAVEFUNCTION_H
-#include "wavefunction.h"
+#ifndef ATOMWAVEFUNCTION_H
+#define ATOMWAVEFUNCTION_H
 #include "slater.h"
 #include "jastrow.h"
 
@@ -8,10 +7,10 @@
 using namespace std;
 using namespace arma;
 
-class Wavefunction
+class AtomWavefunction
 {
 public:
-    Wavefunction(int _nParticles, double _alpha, double _beta);
+    AtomWavefunction(int _nParticles, double _alpha, double _beta);
 
     void setAlpha(const double alpha);
     void setBeta(const double beta);
@@ -32,6 +31,7 @@ public:
     double localKineticCF();
     double potentialEnergy(const mat &r);
     mat localGradient();
+    void setR(double R);
 protected:
     int nParticles;
     int nDimensions;
@@ -43,4 +43,4 @@ protected:
     Jastrow jastrow;
 };
 
-#endif // WAVEFUNCTION_H
+#endif // ATOMWAVEFUNCTION_H

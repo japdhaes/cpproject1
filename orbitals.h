@@ -9,8 +9,8 @@ using namespace arma;
 class Orbitals
 {
 public:
-    Orbitals();
-    void setAlpha(const double &_alpha);
+    Orbitals(double _alpha);
+    virtual void setAlpha(const double &_alpha)=0;
     virtual void setR(const double &dist) = 0;
     virtual double wavefunction(const rowvec &rvec, const int &qNum)=0 ;
     virtual rowvec gradient(const rowvec &rvec, const int &qNum) =0;

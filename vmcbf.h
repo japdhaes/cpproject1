@@ -9,6 +9,8 @@ public:
     VMCBF(int myrank, int numprocs, int _nParticles, double _alpha, double _beta);
     void cycle(const int &i);
     void initialize();
+    void setSteplength(double &sl);
+    double getAcceptanceRatio(double sl);
 private:
     double stepLength;
 };

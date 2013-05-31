@@ -11,8 +11,8 @@ VMCSolver::VMCSolver(int _myrank, int _numprocs, int _nParticles, double _alpha,
     myrank=_myrank;
     this->nCycles=1e5;
     idum=-1-myrank;
-    h=1e-3;
-    h2=1e6;
+    h=5e-3;
+    h2=1.0/h/h;
     local_nCycles=nCycles/numprocs;
 }
 
@@ -21,9 +21,14 @@ VMCSolver::~VMCSolver(){
 }
 
 
-void VMCSolver::setAlphaBeta(double alpha, double beta){
+void VMCSolver::setAlphaBeta(const double &alpha, const double &beta){
     this->wf.setAlpha(alpha);
     this->wf.setBeta(beta);
+}
+
+void VMCSolver::setdist(const double &dist)
+{
+    wf.setR(dist/2.0);
 }
 
 double VMCSolver::runMonteCarloIntegration()
@@ -68,7 +73,9 @@ double VMCSolver::runMonteCarloIntegration()
 
         }
         //collect data
-        deltaE = wf.localEnergyCF(rNew);
+
+        //deltaE = wf.localEnergyCF(rNew);
+        wf.localEnergyNum(rNew);
         if(createOutput){
             datalogger.addData(deltaE);
         }
@@ -94,17 +101,19 @@ double VMCSolver::runMonteCarloIntegration()
     totalenergy/=numprocs;
     MPI_Allreduce(&nAccepted, &totalaccepted, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     MPI_Allreduce(&nRejected, &totalrejected, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    MPI_Allreduce(&energySquared, &totalenergySquared, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&energySquared, &totalenergySquared, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
     totalenergySquared/=numprocs;
-    double acceptratio=double(totalaccepted)/(totalrejected+totalaccepted);
+    acceptRatio=double(totalaccepted)/(totalrejected+totalaccepted);
 
     double variance = totalenergySquared-pow(totalenergy,2);
 
-//    cout << "Energy: " << totalenergy/numprocs << " Energy (squared sum): " << energySquared << endl;
-//    cout << "Variance: "<< energySquared-pow(totalenergy/numprocs,2)<<endl;
-//    cout << "Total acceptratio: " <<acceptratio << endl;
+    cout << "Energy: " << totalenergy << " Energy (squared sum): " << totalenergySquared << endl;
+    cout << "Variance: "<< variance<<endl;
+    cout << "Total acceptratio: " <<acceptRatio << endl;
+
     return totalenergy;
 }
+
 
 
 double VMCSolver::gaussianDeviate(long *seed)

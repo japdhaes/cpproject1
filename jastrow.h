@@ -30,7 +30,7 @@ public:
     double dfdr(const double &r12, const int &particleNum1, const int &particleNum2);
     double d2fdr2(const double &r12, const int &particleNum1, const int &particleNum2);
     mat getGradientRatio(const mat &r);
-    double betaGradient(const int &k);
+    double betaGradient();
 protected:
     int nDimensions;
     int nParticles;

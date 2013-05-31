@@ -8,28 +8,30 @@
 #include "vmcis.h"
 #include <unistd.h>
 #include "testdirectory.h"
-#include "blocking.h"
 #include "minimizer.h"
 
 class MainApplication
 {
 public:
     MainApplication(int _myrank, int _numprocs);
-//    void calculateCFImportanceSampling();
-//    void calculateClosedForm();
-//    void alphabetavalues();
-//    void steplength_manually();
-//    void steplength_secant();
     void runApplication();
-
-    int numprocs, myrank;
-
     void runSimulation();
     void simulateWithOutput(int nParticles, double alpha, double beta);
-    void blockData();
     void runSimulation(bool importancesampling, int nCycles, int nParticles, double alpha, double beta);
     void minimizeBruteForce();
     void minimizeNM();
+    void steplengthSecant();
+private:
+    int numprocs, myrank;
+    double alphaHe;
+    double betaHe;
+    double alphaBe;
+    double betaBe;
+    double alphaNe;
+    double betaNe;
+    double alphaH2;
+    double betaH2;
+    double distH2;
 };
 
 #endif // MAINAPPLICATION_H

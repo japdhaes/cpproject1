@@ -1,11 +1,10 @@
 #include "orbitals.h"
 
-Orbitals::Orbitals():
+Orbitals::Orbitals(double _alpha):
     nDimensions(3),
-    dphi(vec(nDimensions))
+    dphi(vec(nDimensions)),
+    alpha(_alpha)
 {
 }
 
-void Orbitals::setAlpha(const double &_alpha){
-    this->alpha= _alpha;
-}
+

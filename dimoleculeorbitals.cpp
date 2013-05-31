@@ -1,23 +1,20 @@
 #include "dimoleculeorbitals.h"
 
 DimoleculeOrbitals::DimoleculeOrbitals(double _alpha, double _dist):
-    Orbitals(),
+    Orbitals(_alpha),
     R(zeros<rowvec>(nDimensions)),
-    alpha(_alpha),
     hydrogenic(Hydrogenic(_alpha))
 {
     R(0)=_dist/2;
 }
 
-void DimoleculeOrbitals::setAlpha(const double &newAlpha)
+void DimoleculeOrbitals::setR(const double &_R)
 {
-    alpha = newAlpha;
-    hydrogenic.setAlpha(newAlpha);
+    R(0) = _R;
 }
-
-void DimoleculeOrbitals::setR(const double &dist)
-{
-    R(0) = dist/2.0;
+void DimoleculeOrbitals::setAlpha(const double &_alpha){
+    this->alpha= _alpha;
+    hydrogenic.setAlpha(_alpha);
 }
 
 double DimoleculeOrbitals::wavefunction(const rowvec &rvec, const int &qNum)

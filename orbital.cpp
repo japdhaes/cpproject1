@@ -1,18 +1,14 @@
 #include "orbital.h"
 
-Hydrogenic::Hydrogenic(double _alpha)
+Hydrogenic::Hydrogenic(double _alpha):
+    Orbitals(_alpha)
 {
-    this->alpha=_alpha;
     this->nDimensions=3;
-}
-
-void Hydrogenic::setAlpha(const double &newAlpha)
-{
-    alpha = newAlpha;
 }
 
 double Hydrogenic::wavefunction(const rowvec &rvec, const int &qNum)
 {
+    //cout << alpha<<endl;
     switch (qNum)
     {
     case 0 :
@@ -37,6 +33,11 @@ double Hydrogenic::wavefunction(const rowvec &rvec, const int &qNum)
     }
 
     return wfCurrent;
+}
+
+void Hydrogenic::setAlpha(const double &_alpha)
+{
+    this->alpha=_alpha;
 }
 
 rowvec Hydrogenic::gradient(const rowvec &rvec, const int &qNum)

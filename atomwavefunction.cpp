@@ -1,21 +1,23 @@
-#include "wavefunction.h"
+#include "atomwavefunction.h"
 
-Wavefunction::Wavefunction(int _nParticles, double _alpha, double _beta):
+AtomWavefunction::AtomWavefunction(int _nParticles, double _alpha, double _beta):
     slater(_alpha, _nParticles, 0),
     jastrow(_beta, _nParticles),
     charge(_nParticles),
     nParticles(_nParticles),
     nDimensions(3),
-    h(1e-3),
-    h2(1e6)
+    h(5e-3),
+    h2(1.0/h/h)
 {
 }
 
-void Wavefunction::setAlpha(const double alpha){
+void AtomWavefunction::setAlpha(const double alpha){
     this->slater.setAlpha(alpha);
 }
 
-void Wavefunction::setBeta(const double beta){
+void AtomWavefunction::setR(double R){}
+
+void AtomWavefunction::setBeta(const double beta){
     if(beta<0){
         cout << "Setting a negative beta value. Exiting."<<endl;
         exit(1);
@@ -23,51 +25,51 @@ void Wavefunction::setBeta(const double beta){
     this->jastrow.setBeta(beta);
 }
 
-void Wavefunction::initialize(const mat &r){
+void AtomWavefunction::initialize(const mat &r){
     this->slater.initialize(r);
     this->jastrow.initialize(r);
 }
 
-double Wavefunction::evaluate(const mat &r)
+double AtomWavefunction::evaluate(const mat &r)
 {
     return jastrow.evaluate(r)*slater.evaluate(r);
 }
 
 
 
-void Wavefunction::setCurrentParticle(const int &i)
+void AtomWavefunction::setCurrentParticle(const int &i)
 {
     this->cp=i;
     this->slater.setCurrentParticle(i);
     this->jastrow.setCurrentParticle(i);
 }
 
-void Wavefunction::setNewPos(const mat &r){
+void AtomWavefunction::setNewPos(const mat &r){
     this->slater.setNewPosition(r);
     this->jastrow.setNewPosition(r);
 }
 
-double Wavefunction::calcRatio(){
+double AtomWavefunction::calcRatio(){
     double ans=this->slater.calcRatio()*this->jastrow.calcRatio();
     return ans*ans;
 }
 
-double Wavefunction::getRatio(){
+double AtomWavefunction::getRatio(){
     double ans=this->slater.getRatio()*this->jastrow.getRatio();
     return ans*ans;
 }
 
-void Wavefunction::acceptMove(){
+void AtomWavefunction::acceptMove(){
     this->slater.acceptMove();
     this->jastrow.acceptMove();
 }
 
-void Wavefunction::rejectMove(){
+void AtomWavefunction::rejectMove(){
     this->slater.rejectMove();
     this->jastrow.rejectMove();
 }
 
-double Wavefunction::localEnergyCF(const mat &r){
+double AtomWavefunction::localEnergyCF(const mat &r){
     double kinetic=localKineticCF();
     double potential=this->potentialEnergy(r);
 //    cout << r << endl;
@@ -75,7 +77,7 @@ double Wavefunction::localEnergyCF(const mat &r){
     return kinetic+potential;
 }
 
-double Wavefunction::localKineticCF(){
+double AtomWavefunction::localKineticCF(){
     //slide 173
     double kin=0.0;
     for(int i=0; i<this->nParticles;i++){
@@ -87,7 +89,7 @@ double Wavefunction::localKineticCF(){
     return kin;
 }
 
-double Wavefunction::potentialEnergy(const mat &r){
+double AtomWavefunction::potentialEnergy(const mat &r){
     double potentialEnergy = 0;
     double rSingleParticle = 0;
     // Contribution from electron-nucleus potential
@@ -112,7 +114,7 @@ double Wavefunction::potentialEnergy(const mat &r){
     return potentialEnergy;
 }
 
-double Wavefunction::localEnergyNum(const mat &r)
+double AtomWavefunction::localEnergyNum(const mat &r)
 {
     mat rPlus = zeros<mat>(nParticles, nDimensions);
     mat rMinus = zeros<mat>(nParticles, nDimensions);
@@ -147,7 +149,7 @@ double Wavefunction::localEnergyNum(const mat &r)
     return kineticEnergy + potentialEnergy;
 }
 
-mat Wavefunction::localGradient(){
+mat AtomWavefunction::localGradient(){
     mat gradient=zeros(nParticles, nDimensions);
     gradient.zeros();
     for(int j=0; j<nParticles;j++){

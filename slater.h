@@ -12,6 +12,7 @@ public:
     Slater();
 //    Slater(int myrank, int numprocs, double _alpha, double _beta);
     Slater(double _alpha, int _nParticles, int orbitaltype);
+    ~Slater();
     void setAlpha(const double _alpha);
     void setCurrentParticle(const int &i);
     void setNewPosition(const mat &r);
@@ -38,6 +39,7 @@ public:
     mat gradient(const mat &r, const double &h);
     double alphaGradient(const int &i);
     void setR(const double &dist);
+
 protected:
     int nDimensions;
     int nParticles;

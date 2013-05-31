@@ -6,10 +6,10 @@ Slater::Slater(double _alpha, int _nParticles, int orbitaltype){
     this->nParticles=_nParticles;
     this->hp=_nParticles/2;
     if(orbitaltype==0){
-        *(this->orbs)=Hydrogenic(this->alpha);
+        (this->orbs)=new Hydrogenic(this->alpha);
     }
     else if(orbitaltype==1){
-        *(this->orbs)=DimoleculeOrbitals(_alpha, 0);
+        (this->orbs)=new DimoleculeOrbitals(_alpha, 0);
     }
     this->rOld = zeros<mat>(nParticles, nDimensions);
     this->rNew = zeros<mat>(nParticles, nDimensions);
@@ -23,6 +23,10 @@ Slater::Slater(double _alpha, int _nParticles, int orbitaltype){
     this->sddowninversenew = zeros<mat>(hp, hp);
     this->R=1.0;
     this->S=zeros(1,this->hp);
+}
+
+Slater::~Slater(){
+    delete this->orbs;
 }
 
 void Slater::setR(const double &dist)

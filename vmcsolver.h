@@ -5,7 +5,8 @@
 #include <armadillo>
 #include <mpi.h>
 #include "orbital.h"
-#include "wavefunction.h"
+#include "atomwavefunction.h"
+#include "dimoleculewavefunction.h"
 #include "datalogger.h"
 
 const double pi=3.1415926535;
@@ -34,7 +35,8 @@ public:
     void            setOutputDirectory(const string &directoryName);
 
     void thermalize();
-    void setAlphaBeta(double alpha, double beta);
+    void setAlphaBeta(const double &alpha, const double &beta);
+    void setdist(const double &dist);
 protected:
     int             nAccepted;
     int             nRejected;
@@ -47,9 +49,12 @@ protected:
 
     double          h;
     double          h2;
+    double          acceptRatio;
 
     long            idum;
-    Wavefunction    wf;
+    AtomWavefunction    wf;
+    //DimoleculeWavefunction wf;
+
 
     mat             rOld;
     mat             rNew;

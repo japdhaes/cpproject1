@@ -12,26 +12,38 @@ public:
     void nelderMeadMethod();
     void orderPoints();
     void reduction();
-    void contraction();
+    void innercontraction();
+    void outercontraction();
 
     void acceptReflection();
     void expansion();
     void decideCase();
     void calculateReflectedPoint();
     void calculateCenterOfGravity();
+
+    void nelderMeadMethodDM();
+    void reductionDM();
+    void outercontractionDM();
+    void innercontractionDM();
+    void expansionDM();
+    void calculateReflectedPointDM();
+    void calculateCenterOfGravityDM();
+    void decideCaseDM();
+    void acceptReflectionDM();
 protected:
     int myrank;
     int numprocs;
+    int nParticles;
 
-    double alphaNM;
     double gammaNM;
     double rhoNM;
     double sigmaNM;
+    double chiNM;
 
-    double reflectedalpha, reflectedbeta;
-    double gravityalpha, gravitybeta;
-    double expansionalpha, expansionbeta;
-    double contractionalpha, contractionbeta;
+    double reflectedalpha, reflectedbeta, reflecteddist;
+    double gravityalpha, gravitybeta, gravitydist;
+    double expansionalpha, expansionbeta, expansiondist;
+    double contractionalpha, contractionbeta, contractiondist;
 
     double energyReflectedPoint;
     double energyExpansionPoint;

@@ -18,11 +18,13 @@ void VMCBF::cycle(const int &i){
     if(ran2(&idum) <= wf.calcRatio()) {
         wf.acceptMove();
         rOld.row(i)=rNew.row(i);
+        nAccepted++;
     }
     //rejecting
     else {
         wf.rejectMove();
         rNew.row(i)=rOld.row(i);
+        nRejected++;
     }
 }
 
@@ -31,4 +33,15 @@ void VMCBF::initialize()
     solverInitializer();
     rNew = rOld;
     wf.initialize(rOld);
+}
+
+void VMCBF::setSteplength(double &sl){
+    this->stepLength = sl;
+}
+
+double VMCBF::getAcceptanceRatio(double sl){
+    this->setSteplength(sl);
+    this->runMonteCarloIntegration();
+    return this->acceptRatio;
+
 }

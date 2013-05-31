@@ -19,7 +19,6 @@ public:
 
 private:
     Hydrogenic hydrogenic;
-    double alpha;
     rowvec R;
 };
 

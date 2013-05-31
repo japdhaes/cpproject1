@@ -64,7 +64,7 @@ void spline(double *, double *, int, double, double, double *);
 void splint(double *, double *, double *, int, double, double *);
 void polint(double *, double *, int, double, double *, double *);
 double rtbis(double(*func)(double), double, double, double);
-double rtsec(double( *func)(double), double, double, double);
+double rtsec(double( *func)(double,double), double, double, double,double);
 double rtnewt(void ( *funcd)(double, double *, double *), double, double, double);
 double zbrent(double( *func)(double), double, double, double);
 double ran0(long *);
