@@ -32,6 +32,9 @@ private:
     double alphaH2;
     double betaH2;
     double distH2;
+    double alphaBe2;
+    double betaBe2;
+    double distBe2;
 };
 
 #endif // MAINAPPLICATION_H

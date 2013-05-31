@@ -74,8 +74,7 @@ double VMCSolver::runMonteCarloIntegration()
         }
         //collect data
 
-        //deltaE = wf.localEnergyCF(rNew);
-        wf.localEnergyNum(rNew);
+        deltaE = wf.localEnergyCF(rNew);
         if(createOutput){
             datalogger.addData(deltaE);
         }

@@ -1,13 +1,13 @@
 #read data from file
 from numpy import *
 maxBlockSizeTreshold=1e4
-directoryName="/home/jonathan/projectsCP/project1/data/dihydrogen/"
+directoryName="/home/jonathan/projectsCP/project1/data/diberyllium/"
 #directoryName="/uio/arkimedes/s79/jonatdh/"
 fileName="data"
 extension=".dat"
 nNodes=2
 deltaBlockSize = 10
-outFilename = "blockingh2energy.mat"
+outFilename = "blockingbe2energy.mat"
 
 def importdata():
         filename=directoryName+fileName+"0"+extension

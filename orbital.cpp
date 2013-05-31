@@ -170,10 +170,6 @@ vec3 Hydrogenic::dphi2p(const vec3 &rvec, const int &k)
     }
     r = sqrt(r2);
     dphi = -alpha * rvec(k) * rvec;
-//    for (int i = 0; i < nDimensions; i++)
-//    {
-//        dphi(i) = -alpha*rvec(i)*rvec(k);
-//    }
     dphi(k) += 2*r;
     dphi *= exp(-alpha*r/2.0)/(2*r);
     return dphi;
@@ -214,8 +210,9 @@ double Hydrogenic::ddphi2p(const vec &rvec, const int &k)
 double Hydrogenic::alphaGradient(const rowvec &rvec, const int &qNum)
 {
     double r = 0.0;
-    for (int i = 0; i < nDimensions; i++)
+    for (int i = 0; i < nDimensions; i++){
         r += rvec(i)*rvec(i);
+    }
     r = sqrt(r);
 
     switch (qNum)

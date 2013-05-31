@@ -1,4 +1,5 @@
 #include "mainapplication.h"
+using namespace std;
 
 MainApplication::MainApplication(int _myrank, int _numprocs):
     myrank(_myrank),
@@ -11,11 +12,13 @@ MainApplication::MainApplication(int _myrank, int _numprocs):
     betaNe(0.09522905708),
     alphaH2(1.382),
     betaH2(0.208),
-    distH2(1.263)
+    distH2(1.263),
+    alphaBe2(3.84229201074),
+    betaBe2(0.17401323480),
+    distBe2(5.26929149735)
 {
 }
 
-using namespace std;
 
 void MainApplication::runApplication(){
     //==========================
@@ -53,8 +56,8 @@ void MainApplication::runApplication(){
     //dist = 1.263
     //==========================
 
-    runSimulation();
-    //simulateWithOutput(2, 1.38232847756, 0.20780543704);
+    //runSimulation();
+    simulateWithOutput(8, alphaBe2, betaBe2);
     //minimizeBruteForce();
     //minimizeNM();
 }
@@ -71,7 +74,7 @@ void MainApplication::minimizeBruteForce(){
 }
 
 void MainApplication::minimizeNM(){
-    Minimizer minimizer(myrank, numprocs, 4);
+    Minimizer minimizer(myrank, numprocs, 8);
     minimizer.nelderMeadMethodDM();
 }
 
@@ -110,6 +113,9 @@ void MainApplication::simulateWithOutput(int nParticles, double alpha, double be
     else if (nParticles == 10){
         outputfolder << "neon/";
     }
+    else if (nParticles ==8){
+        outputfolder << "diberyllium/";
+    }
     else{
         outputfolder << nParticles<<"particles/";
     }
@@ -138,7 +144,7 @@ void MainApplication::simulateWithOutput(int nParticles, double alpha, double be
 //    double beta=0.1;
 
     VMCIS vmc=VMCIS(this->myrank, this->numprocs, nParticles, alpha, beta);
-    vmc.setdist(1.26284067098);
+    vmc.setdist(distBe2);
     vmc.setCycles(1e6);
     vmc.setOutput(true);
     vmc.setOutputDirectory(outputfolder.str().c_str());
@@ -159,12 +165,11 @@ void MainApplication::runSimulation(bool importancesampling, int nCycles, int nP
 }
 
 void MainApplication::runSimulation(){
-    int nCycles=1e5;
-    bool importancesampling=true;
+    int nCycles=1e6;
     //Helium
-    int nParticles=4;
-    double alpha=1.8;
-    double beta=0.36;
+    int nParticles=8;
+    double alpha=3.76;
+    double beta=0.49;
 
     //Beryllium
 //    int nParticles=10;
@@ -178,6 +183,7 @@ void MainApplication::runSimulation(){
 //    double beta=0.4;
 
     VMCIS vmc=VMCIS(this->myrank, this->numprocs, nParticles, alpha, beta);
+    vmc.setdist(2.45);
     vmc.setCycles(nCycles);
     cout << vmc.runMonteCarloIntegration()<<endl;
 }

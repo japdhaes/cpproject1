@@ -92,7 +92,8 @@ void DimoleculeWavefunction::rejectMove(){
 double DimoleculeWavefunction::localEnergyCF(const mat &r){
     double kinetic=localKineticCF();
     double potential=this->potentialEnergy(r);
-    //cout << "CLOSED FORM: Kin " << kinetic << " pot " << potential << " tot " << kinetic+potential<<endl;
+//    cout << "CLOSED FORM: Kin " << kinetic << " pot " << potential << " tot " << kinetic+potential<<endl;
+//    cout << evaluate(r )<<endl;
     return kinetic+potential;
 }
 

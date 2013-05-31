@@ -52,8 +52,8 @@ protected:
     double          acceptRatio;
 
     long            idum;
-    AtomWavefunction    wf;
-    //DimoleculeWavefunction wf;
+    //AtomWavefunction    wf;
+    DimoleculeWavefunction wf;
 
 
     mat             rOld;

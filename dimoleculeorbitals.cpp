@@ -19,20 +19,38 @@ void DimoleculeOrbitals::setAlpha(const double &_alpha){
 
 double DimoleculeOrbitals::wavefunction(const rowvec &rvec, const int &qNum)
 {
-    return hydrogenic.wavefunction(rvec + R, qNum)
-            + hydrogenic.wavefunction(rvec - R, qNum);
+    if (qNum%2 == 0){
+        return hydrogenic.wavefunction(rvec + R, qNum/2)
+                + hydrogenic.wavefunction(rvec - R, qNum/2);
+    }
+    else{
+        return hydrogenic.wavefunction(rvec + R, qNum/2)
+                - hydrogenic.wavefunction(rvec - R, qNum/2);
+    }
 }
 
 rowvec DimoleculeOrbitals::gradient(const rowvec &rvec, const int &qNum)
 {
-    return hydrogenic.gradient(rvec + R, qNum)
-            + hydrogenic.gradient(rvec - R, qNum);
+    if (qNum%2 == 0){
+        return hydrogenic.gradient(rvec + R, qNum/2)
+            + hydrogenic.gradient(rvec - R, qNum/2);
+    }
+    else{
+        return hydrogenic.gradient(rvec + R, qNum/2)
+            - hydrogenic.gradient(rvec - R, qNum/2);
+    }
 }
 
 double DimoleculeOrbitals::laplacian(const rowvec &rvec, const int &qNum)
 {
-    return hydrogenic.laplacian(rvec + R, qNum)
-            + hydrogenic.laplacian(rvec - R, qNum);
+    if (qNum%2 == 0){
+        return hydrogenic.laplacian(rvec + R, qNum/2)
+            + hydrogenic.laplacian(rvec - R, qNum/2);
+    }
+    else{
+        return hydrogenic.laplacian(rvec + R, qNum/2)
+            - hydrogenic.laplacian(rvec - R, qNum/2);
+    }
 }
 
 double DimoleculeOrbitals::alphaGradient(const rowvec &rvec, const int &qNum)
